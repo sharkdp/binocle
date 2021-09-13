@@ -1,0 +1,8 @@
+[package]
+name = "binocle"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+png = "0.17"
+colorgrad = "0.5"
