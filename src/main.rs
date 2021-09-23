@@ -1,7 +1,6 @@
 use std::fs::File;
-use std::io::{self, BufReader, BufWriter, Read};
+use std::io::{self, BufReader, Read};
 use std::path::Path;
-use std::process::Command;
 
 fn grayscale(b: u8) -> [u8; 4] {
     [b, b, b, 255]
@@ -27,11 +26,14 @@ fn category(b: u8) -> [u8; 4] {
 
 fn color_gradient(b: u8) -> [u8; 4] {
     let gradient = colorgrad::magma();
-    let color = gradient.at((b as f64)/255.0f64);
-    [(color.r * 255.0) as u8, (color.g * 255.0) as u8, (color.b * 255.0) as u8, 255]
+    let color = gradient.at((b as f64) / 255.0f64);
+    [
+        (color.r * 255.0) as u8,
+        (color.g * 255.0) as u8,
+        (color.b * 255.0) as u8,
+        255,
+    ]
 }
-
-struct Binocle {}
 
 fn read_binary<P: AsRef<Path>>(path: P, buffer: &mut Vec<u8>) -> io::Result<()> {
     let file = File::open(path)?;
@@ -42,45 +44,134 @@ fn read_binary<P: AsRef<Path>>(path: P, buffer: &mut Vec<u8>) -> io::Result<()> 
     return Ok(());
 }
 
-fn write_png(width: u32, height: u32, data: &[u8]) {
-    let path = Path::new(r"/tmp/out.png");
-    let file = File::create(path).unwrap();
-    let ref mut w = BufWriter::new(file);
+use log::error;
+use pixels::{Error, Pixels, SurfaceTexture};
+use winit::dpi::LogicalSize;
+use winit::event::{Event, VirtualKeyCode};
+use winit::event_loop::{ControlFlow, EventLoop};
+use winit::window::WindowBuilder;
+use winit_input_helper::WinitInputHelper;
 
-    let mut encoder = png::Encoder::new(w, width, height);
-    encoder.set_color(png::ColorType::Rgba);
-    encoder.set_depth(png::BitDepth::Eight);
-    let mut writer = encoder.write_header().unwrap();
+use crate::gui::Gui;
 
-    writer.write_image_data(&data).unwrap();
+mod gui;
+
+const WIDTH: u32 = 800;
+const HEIGHT: u32 = 600;
+
+struct Binocle {
+    buffer: Vec<u8>,
 }
 
-fn main() {
-    let args: Vec<_> = std::env::args().collect();
-    let width = args[1].parse::<u32>().unwrap();
-    
-    // let width = 2 * 201u32;
-    
-    // let width = 1238u32;
-
-    let mut buffer: Vec<u8> = vec![];
-    read_binary("tests/bag-small", &mut buffer);
-
-    let height = (buffer.len() as u32) / width;
-
-    let len_truncated = (width as usize) * (height as usize);
-
-    let mut pixel_buffer: Vec<u8> = vec![255; 4 * len_truncated];
-
-    for i in 0..len_truncated {
-        let byte = buffer[i];
-        let color = color_gradient(byte);
-        for j in 0..4 {
-            pixel_buffer[4 * i + j] = color[j];
-        }
+impl Binocle {
+    fn new() -> Self {
+        let mut buffer = vec![];
+        read_binary("tests/bag-small", &mut buffer).unwrap();
+        Self { buffer }
     }
 
-    write_png(width, height, &pixel_buffer);
+    fn update(&mut self) {
+        // let width = WIDTH;
 
-    // Command::new("feh").arg("-B").arg("#333333").arg("--force-aliasing").arg("/tmp/out.png").status();
+        // let height = (self.buffer.len() as u32) / width;
+        // let len_truncated = (width as usize) * (height as usize);
+
+        // write_png(width, height, &pixel_buffer);
+    }
+
+    fn draw(&self, frame: &mut [u8]) {
+        for (i, pixel) in frame.chunks_exact_mut(4).enumerate() {
+            // let x = (i % WIDTH as usize) as i16;
+            // let y = (i / WIDTH as usize) as i16;
+
+            let byte = self.buffer[i];
+            let color = colorful(byte);
+
+            pixel.copy_from_slice(&color);
+        }
+    }
+}
+
+fn main() -> Result<(), Error> {
+    env_logger::init();
+    let event_loop = EventLoop::new();
+    let mut input = WinitInputHelper::new();
+    let window = {
+        let size = LogicalSize::new(WIDTH as f64, HEIGHT as f64);
+        WindowBuilder::new()
+            .with_title("binocle")
+            .with_inner_size(size)
+            .with_min_inner_size(size)
+            .build(&event_loop)
+            .unwrap()
+    };
+
+    let (mut pixels, mut gui) = {
+        let window_size = window.inner_size();
+        let scale_factor = window.scale_factor();
+        let surface_texture = SurfaceTexture::new(window_size.width, window_size.height, &window);
+        let pixels = Pixels::new(WIDTH, HEIGHT, surface_texture)?;
+        let gui = Gui::new(window_size.width, window_size.height, scale_factor, &pixels);
+
+        (pixels, gui)
+    };
+
+    let mut binocle = Binocle::new();
+
+    event_loop.run(move |event, _, control_flow| {
+        // Update egui inputs
+        gui.handle_event(&event);
+
+        // Draw the current frame
+        if let Event::RedrawRequested(_) = event {
+            // Draw the binocle
+            binocle.draw(pixels.get_frame());
+
+            // Prepare egui
+            gui.prepare(&window);
+
+            // Render everything together
+            let render_result = pixels.render_with(|encoder, render_target, context| {
+                // Render the binocle texture
+                context.scaling_renderer.render(encoder, render_target);
+
+                // Render egui
+                gui.render(encoder, render_target, context)
+                    .expect("egui render error");
+            });
+
+            // Basic error handling
+            if render_result
+                .map_err(|e| error!("pixels.render() failed: {}", e))
+                .is_err()
+            {
+                *control_flow = ControlFlow::Exit;
+                return;
+            }
+        }
+
+        // Handle input events
+        if input.update(&event) {
+            // Close events
+            if input.key_pressed(VirtualKeyCode::Escape) || input.quit() {
+                *control_flow = ControlFlow::Exit;
+                return;
+            }
+
+            // Update the scale factor
+            if let Some(scale_factor) = input.scale_factor() {
+                gui.scale_factor(scale_factor);
+            }
+
+            // Resize the window
+            if let Some(size) = input.window_resized() {
+                pixels.resize_surface(size.width, size.height);
+                gui.resize(size.width, size.height);
+            }
+
+            // Update internal state and request a redraw
+            binocle.update();
+            window.request_redraw();
+        }
+    });
 }
