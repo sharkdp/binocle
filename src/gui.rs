@@ -5,7 +5,7 @@ use pixels::{wgpu, PixelsContext};
 use std::time::Instant;
 use winit::window::Window;
 
-use crate::settings::BinocleSettings;
+use crate::settings::{BinocleSettings, PixelStyle};
 
 pub struct Gui {
     // State for egui.
@@ -17,7 +17,6 @@ pub struct Gui {
 
     // App state
     about_dialog_open: bool,
-    settings_open: bool,
 }
 
 impl Gui {
@@ -43,7 +42,6 @@ impl Gui {
             rpass,
             paint_jobs: Vec::new(),
             about_dialog_open: false,
-            settings_open: true,
         }
     }
 
@@ -95,10 +93,22 @@ impl Gui {
                 ui.label("A binary file visualizer");
             });
 
-        egui::Window::new("Settings")
-            .open(&mut self.settings_open)
+        egui::SidePanel::right("Settings")
+            .min_width(500.0)
             .show(ctx, |ui| {
-                ui.add(egui::Slider::new(&mut settings.width, 8..=640).text("width"));
+                ui.add(
+                    egui::Slider::new(&mut settings.width, 8..=settings.canvas_width)
+                        .clamp_to_range(true)
+                        .text("width"),
+                );
+                ui.add(
+                    egui::Slider::new(&mut settings.offset, 0..=settings.buffer_length)
+                        .clamp_to_range(true)
+                        .text("offset"),
+                );
+                ui.selectable_value(&mut settings.pixel_style, PixelStyle::Colorful, "Colorful");
+                ui.selectable_value(&mut settings.pixel_style, PixelStyle::Grayscale, "Grayscale");
+                ui.selectable_value(&mut settings.pixel_style, PixelStyle::Category, "Category");
             });
     }
 

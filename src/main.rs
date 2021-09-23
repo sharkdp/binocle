@@ -14,10 +14,10 @@ mod gui;
 mod settings;
 
 use crate::gui::Gui;
-use crate::settings::BinocleSettings;
+use crate::settings::{BinocleSettings, PixelStyle};
 
-const WIDTH: u32 = 800;
-const HEIGHT: u32 = 600;
+const WIDTH: u32 = 1024;
+const HEIGHT: u32 = 1024;
 
 fn grayscale(b: u8) -> [u8; 4] {
     [b, b, b, 255]
@@ -72,6 +72,10 @@ impl Binocle {
         Self { buffer }
     }
 
+    fn len(&self) -> usize {
+        self.buffer.len()
+    }
+
     fn update(&mut self) {
         // let width = WIDTH;
 
@@ -82,6 +86,12 @@ impl Binocle {
     }
 
     fn draw(&self, frame: &mut [u8], settings: &BinocleSettings) {
+        let style = match settings.pixel_style {
+            PixelStyle::Category => category,
+            PixelStyle::Colorful => colorful,
+            PixelStyle::Grayscale => grayscale,
+        };
+
         for (i, pixel) in frame.chunks_exact_mut(4).enumerate() {
             let x = (i % WIDTH as usize) as usize;
             let y = (i / WIDTH as usize) as usize;
@@ -89,8 +99,13 @@ impl Binocle {
             let color = if x > settings.width {
                 [0, 0, 0, 0]
             } else {
-                let byte = self.buffer[y * settings.width + x];
-                colorful(byte)
+                let index = settings.offset + y * settings.width + x;
+                if index >= self.buffer.len() {
+                    [0, 0, 0, 0]
+                } else {
+                    let byte = self.buffer[index];
+                    style(byte)
+                }
             };
 
             pixel.copy_from_slice(&color);
@@ -115,7 +130,8 @@ fn main() -> Result<(), Error> {
     let (mut pixels, mut gui) = {
         let window_size = window.inner_size();
         let scale_factor = window.scale_factor();
-        let surface_texture = SurfaceTexture::new(window_size.width, window_size.height, &window);
+        let surface_texture =
+            SurfaceTexture::new(window_size.width / 2, window_size.height / 2, &window);
         let pixels = Pixels::new(WIDTH, HEIGHT, surface_texture)?;
         let gui = Gui::new(window_size.width, window_size.height, scale_factor, &pixels);
 
@@ -124,7 +140,11 @@ fn main() -> Result<(), Error> {
 
     let mut binocle = Binocle::new();
     let mut settings = BinocleSettings {
-        width: WIDTH as usize,
+        width: 804,
+        offset: 0,
+        pixel_style: PixelStyle::Colorful,
+        buffer_length: binocle.len(),
+        canvas_width: WIDTH as usize,
     };
 
     event_loop.run(move |event, _, control_flow| {
