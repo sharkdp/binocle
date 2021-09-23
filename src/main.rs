@@ -2,6 +2,23 @@ use std::fs::File;
 use std::io::{self, BufReader, Read};
 use std::path::Path;
 
+use log::error;
+use pixels::{Error, Pixels, SurfaceTexture};
+use winit::dpi::LogicalSize;
+use winit::event::{Event, VirtualKeyCode};
+use winit::event_loop::{ControlFlow, EventLoop};
+use winit::window::WindowBuilder;
+use winit_input_helper::WinitInputHelper;
+
+mod gui;
+mod settings;
+
+use crate::gui::Gui;
+use crate::settings::BinocleSettings;
+
+const WIDTH: u32 = 800;
+const HEIGHT: u32 = 600;
+
 fn grayscale(b: u8) -> [u8; 4] {
     [b, b, b, 255]
 }
@@ -44,21 +61,6 @@ fn read_binary<P: AsRef<Path>>(path: P, buffer: &mut Vec<u8>) -> io::Result<()> 
     return Ok(());
 }
 
-use log::error;
-use pixels::{Error, Pixels, SurfaceTexture};
-use winit::dpi::LogicalSize;
-use winit::event::{Event, VirtualKeyCode};
-use winit::event_loop::{ControlFlow, EventLoop};
-use winit::window::WindowBuilder;
-use winit_input_helper::WinitInputHelper;
-
-use crate::gui::Gui;
-
-mod gui;
-
-const WIDTH: u32 = 800;
-const HEIGHT: u32 = 600;
-
 struct Binocle {
     buffer: Vec<u8>,
 }
@@ -79,13 +81,17 @@ impl Binocle {
         // write_png(width, height, &pixel_buffer);
     }
 
-    fn draw(&self, frame: &mut [u8]) {
+    fn draw(&self, frame: &mut [u8], settings: &BinocleSettings) {
         for (i, pixel) in frame.chunks_exact_mut(4).enumerate() {
-            // let x = (i % WIDTH as usize) as i16;
-            // let y = (i / WIDTH as usize) as i16;
+            let x = (i % WIDTH as usize) as usize;
+            let y = (i / WIDTH as usize) as usize;
 
-            let byte = self.buffer[i];
-            let color = colorful(byte);
+            let color = if x > settings.width {
+                [0, 0, 0, 0]
+            } else {
+                let byte = self.buffer[y * settings.width + x];
+                colorful(byte)
+            };
 
             pixel.copy_from_slice(&color);
         }
@@ -117,6 +123,9 @@ fn main() -> Result<(), Error> {
     };
 
     let mut binocle = Binocle::new();
+    let mut settings = BinocleSettings {
+        width: WIDTH as usize,
+    };
 
     event_loop.run(move |event, _, control_flow| {
         // Update egui inputs
@@ -125,10 +134,10 @@ fn main() -> Result<(), Error> {
         // Draw the current frame
         if let Event::RedrawRequested(_) = event {
             // Draw the binocle
-            binocle.draw(pixels.get_frame());
+            binocle.draw(pixels.get_frame(), &settings);
 
             // Prepare egui
-            gui.prepare(&window);
+            gui.prepare(&window, &mut settings);
 
             // Render everything together
             let render_result = pixels.render_with(|encoder, render_target, context| {
@@ -153,7 +162,10 @@ fn main() -> Result<(), Error> {
         // Handle input events
         if input.update(&event) {
             // Close events
-            if input.key_pressed(VirtualKeyCode::Escape) || input.quit() {
+            if input.key_pressed(VirtualKeyCode::Escape)
+                || input.key_pressed(VirtualKeyCode::Q)
+                || input.quit()
+            {
                 *control_flow = ControlFlow::Exit;
                 return;
             }
