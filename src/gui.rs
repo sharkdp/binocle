@@ -93,32 +93,47 @@ impl Gui {
                 ui.label("A binary file visualizer");
             });
 
-        egui::SidePanel::right("Settings")
-            .show(ctx, |ui| {
-                ui.add(
-                    egui::Slider::new(&mut settings.width, 8..=settings.canvas_width)
-                        .clamp_to_range(true)
-                        .smart_aim(false)
-                        .text("width"),
-                );
-                ui.add(
-                    egui::Slider::new(&mut settings.offset, 0..=settings.buffer_length)
-                        .clamp_to_range(true)
-                        .smart_aim(false)
-                        .text("offset"),
-                );
-                ui.add(
-                    egui::Slider::new(&mut settings.offset_fine, 0..=settings.width)
-                        .clamp_to_range(true)
-                        .smart_aim(false)
-                        .text("offset (fine)"),
-                );
-                ui.separator();
-                ui.selectable_value(&mut settings.pixel_style, PixelStyle::Colorful, "Colorful");
-                ui.selectable_value(&mut settings.pixel_style, PixelStyle::Grayscale, "Grayscale");
-                ui.selectable_value(&mut settings.pixel_style, PixelStyle::Category, "Category");
-                ui.separator();
-            });
+        egui::SidePanel::right("Settings").show(ctx, |ui| {
+            ui.radio_value(&mut settings.zoom, 1, "1");
+            ui.radio_value(&mut settings.zoom, 2, "2");
+            ui.radio_value(&mut settings.zoom, 4, "4");
+            ui.radio_value(&mut settings.zoom, 8, "8");
+            ui.radio_value(&mut settings.zoom, 16, "16");
+            ui.add(
+                egui::Slider::new(&mut settings.width, 8..=settings.canvas_width)
+                    .clamp_to_range(true)
+                    .smart_aim(false)
+                    .text("width"),
+            );
+            ui.add(
+                egui::Slider::new(&mut settings.offset, 0..=settings.buffer_length)
+                    .clamp_to_range(true)
+                    .smart_aim(false)
+                    .text("offset"),
+            );
+            ui.add(
+                egui::Slider::new(&mut settings.offset_fine, 0..=settings.width)
+                    .clamp_to_range(true)
+                    .smart_aim(false)
+                    .text("offset (fine)"),
+            );
+            ui.add(
+                egui::Slider::new(&mut settings.stride, 1..=32)
+                    .clamp_to_range(true)
+                    .smart_aim(false)
+                    .text("stride"),
+            );
+            ui.separator();
+            ui.label("Pixel style");
+            ui.selectable_value(&mut settings.pixel_style, PixelStyle::Colorful, "Colorful");
+            ui.selectable_value(
+                &mut settings.pixel_style,
+                PixelStyle::Grayscale,
+                "Grayscale",
+            );
+            ui.selectable_value(&mut settings.pixel_style, PixelStyle::Category, "Category");
+            ui.separator();
+        });
     }
 
     /// Render egui.

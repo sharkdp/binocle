@@ -6,9 +6,11 @@ pub enum PixelStyle {
 }
 
 pub struct BinocleSettings {
+    pub zoom: usize,
     pub width: usize,
     pub offset: usize,
     pub offset_fine: usize,
+    pub stride: usize,
 
     pub pixel_style: PixelStyle,
 

@@ -93,13 +93,15 @@ impl Binocle {
         };
 
         for (i, pixel) in frame.chunks_exact_mut(4).enumerate() {
-            let x = (i % WIDTH as usize) as usize;
-            let y = (i / WIDTH as usize) as usize;
+            let x = ((i % WIDTH as usize) as usize) / settings.zoom;
+            let y = ((i / WIDTH as usize) as usize) / settings.zoom;
 
             let color = if x > settings.width {
                 [0, 0, 0, 0]
             } else {
-                let index = settings.offset + settings.offset_fine + y * settings.width + x;
+                let index = settings.offset
+                    + settings.offset_fine
+                    + (y * settings.width + x) * settings.stride;
                 if index >= self.buffer.len() {
                     [0, 0, 0, 0]
                 } else {
@@ -140,9 +142,11 @@ fn main() -> Result<(), Error> {
 
     let mut binocle = Binocle::new();
     let mut settings = BinocleSettings {
+        zoom: 1,
         width: 804,
         offset: 0,
         offset_fine: 0,
+        stride: 3,
         pixel_style: PixelStyle::Colorful,
         buffer_length: binocle.len(),
         canvas_width: WIDTH as usize,
