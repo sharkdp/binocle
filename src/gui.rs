@@ -94,21 +94,30 @@ impl Gui {
             });
 
         egui::SidePanel::right("Settings")
-            .min_width(500.0)
             .show(ctx, |ui| {
                 ui.add(
                     egui::Slider::new(&mut settings.width, 8..=settings.canvas_width)
                         .clamp_to_range(true)
+                        .smart_aim(false)
                         .text("width"),
                 );
                 ui.add(
                     egui::Slider::new(&mut settings.offset, 0..=settings.buffer_length)
                         .clamp_to_range(true)
+                        .smart_aim(false)
                         .text("offset"),
                 );
+                ui.add(
+                    egui::Slider::new(&mut settings.offset_fine, 0..=settings.width)
+                        .clamp_to_range(true)
+                        .smart_aim(false)
+                        .text("offset (fine)"),
+                );
+                ui.separator();
                 ui.selectable_value(&mut settings.pixel_style, PixelStyle::Colorful, "Colorful");
                 ui.selectable_value(&mut settings.pixel_style, PixelStyle::Grayscale, "Grayscale");
                 ui.selectable_value(&mut settings.pixel_style, PixelStyle::Category, "Category");
+                ui.separator();
             });
     }
 

@@ -99,7 +99,7 @@ impl Binocle {
             let color = if x > settings.width {
                 [0, 0, 0, 0]
             } else {
-                let index = settings.offset + y * settings.width + x;
+                let index = settings.offset + settings.offset_fine + y * settings.width + x;
                 if index >= self.buffer.len() {
                     [0, 0, 0, 0]
                 } else {
@@ -142,6 +142,7 @@ fn main() -> Result<(), Error> {
     let mut settings = BinocleSettings {
         width: 804,
         offset: 0,
+        offset_fine: 0,
         pixel_style: PixelStyle::Colorful,
         buffer_length: binocle.len(),
         canvas_width: WIDTH as usize,
