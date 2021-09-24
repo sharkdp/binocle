@@ -41,15 +41,16 @@ fn category(b: u8) -> [u8; 4] {
     }
 }
 
-fn color_gradient(b: u8) -> [u8; 4] {
-    let gradient = colorgrad::magma();
-    let color = gradient.at((b as f64) / 255.0f64);
-    [
-        (color.r * 255.0) as u8,
-        (color.g * 255.0) as u8,
-        (color.b * 255.0) as u8,
-        255,
-    ]
+fn color_gradient(gradient: colorgrad::Gradient) -> Box<dyn Fn(u8) -> [u8; 4]> {
+    Box::new(move |b| {
+        let color = gradient.at((b as f64) / 255.0f64);
+        [
+            (color.r * 255.0) as u8,
+            (color.g * 255.0) as u8,
+            (color.b * 255.0) as u8,
+            255,
+        ]
+    })
 }
 
 fn read_binary<P: AsRef<Path>>(path: P, buffer: &mut Vec<u8>) -> io::Result<()> {
@@ -66,9 +67,9 @@ struct Binocle {
 }
 
 impl Binocle {
-    fn new() -> Self {
+    fn new(path: &str) -> Self {
         let mut buffer = vec![];
-        read_binary("tests/bag-small", &mut buffer).unwrap();
+        read_binary(path, &mut buffer).unwrap();
         Self { buffer }
     }
 
@@ -86,10 +87,14 @@ impl Binocle {
     }
 
     fn draw(&self, frame: &mut [u8], settings: &BinocleSettings) {
-        let style = match settings.pixel_style {
-            PixelStyle::Category => category,
-            PixelStyle::Colorful => colorful,
-            PixelStyle::Grayscale => grayscale,
+        let style: Box<dyn Fn(u8) -> [u8; 4]> = match settings.pixel_style {
+            PixelStyle::Category => Box::new(category),
+            PixelStyle::Colorful => Box::new(colorful),
+            PixelStyle::Grayscale => Box::new(grayscale),
+            PixelStyle::GradientMagma => color_gradient(colorgrad::magma()),
+            PixelStyle::GradientPlasma => color_gradient(colorgrad::plasma()),
+            PixelStyle::GradientViridis => color_gradient(colorgrad::viridis()),
+            PixelStyle::GradientRainbow => color_gradient(colorgrad::rainbow()),
         };
 
         for (i, pixel) in frame.chunks_exact_mut(4).enumerate() {
@@ -140,13 +145,15 @@ fn main() -> Result<(), Error> {
         (pixels, gui)
     };
 
-    let mut binocle = Binocle::new();
+    let mut args = std::env::args();
+    args.next();
+    let mut binocle = Binocle::new(&args.next().unwrap_or("tests/bag-small".into()));
     let mut settings = BinocleSettings {
         zoom: 1,
         width: 804,
         offset: 0,
         offset_fine: 0,
-        stride: 3,
+        stride: 1,
         pixel_style: PixelStyle::Colorful,
         buffer_length: binocle.len(),
         canvas_width: WIDTH as usize,

@@ -132,6 +132,10 @@ impl Gui {
                 "Grayscale",
             );
             ui.selectable_value(&mut settings.pixel_style, PixelStyle::Category, "Category");
+            ui.selectable_value(&mut settings.pixel_style, PixelStyle::GradientMagma, "Gradient (Magma)");
+            ui.selectable_value(&mut settings.pixel_style, PixelStyle::GradientPlasma, "Gradient (Plasma)");
+            ui.selectable_value(&mut settings.pixel_style, PixelStyle::GradientViridis, "Gradient (Viridis)");
+            ui.selectable_value(&mut settings.pixel_style, PixelStyle::GradientRainbow, "Gradient (Rainbow)");
             ui.separator();
         });
     }

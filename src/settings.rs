@@ -3,6 +3,10 @@ pub enum PixelStyle {
     Grayscale,
     Colorful,
     Category,
+    GradientMagma,
+    GradientPlasma,
+    GradientViridis,
+    GradientRainbow,
 }
 
 pub struct BinocleSettings {
