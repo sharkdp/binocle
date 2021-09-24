@@ -216,16 +216,25 @@ fn main() -> Result<(), Error> {
                 settings.width += 1;
             }
 
+            let offset_factor = if input.held_shift() { 1 } else { 160 };
+
             if input.key_pressed(VirtualKeyCode::Up) {
-                settings.offset -= settings.width * settings.stride * 10;
+                settings.offset -= offset_factor * settings.width * settings.stride;
             } else if input.key_pressed(VirtualKeyCode::Down) {
-                settings.offset += settings.width * settings.stride * 10;
+                settings.offset += offset_factor * settings.width * settings.stride;
             }
 
             if input.key_pressed(VirtualKeyCode::PageUp) {
                 settings.offset -= settings.width * settings.stride * (HEIGHT as isize);
             } else if input.key_pressed(VirtualKeyCode::PageDown) {
                 settings.offset += settings.width * settings.stride * (HEIGHT as isize);
+            }
+
+            if input.key_pressed(VirtualKeyCode::Home) {
+                settings.offset = 0;
+            } else if input.key_pressed(VirtualKeyCode::End) {
+                settings.offset =
+                    settings.buffer_length - settings.width * (HEIGHT as isize) * settings.stride;
             }
 
             if input.scroll_diff().abs() > 0.5 {
@@ -235,8 +244,7 @@ fn main() -> Result<(), Error> {
                 } else if input.held_alt() {
                     settings.width -= scroll;
                 } else {
-                    let factor = if input.held_shift() { 1 } else { 160 };
-                    settings.offset -= scroll * settings.width * settings.stride * factor;
+                    settings.offset -= offset_factor * scroll * settings.width * settings.stride;
                 }
             }
 
