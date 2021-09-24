@@ -1,18 +1,19 @@
 use std::ffi::OsStr;
 
 use log::error;
-use pixels::{Error, Pixels, SurfaceTexture};
+use pixels::{Pixels, SurfaceTexture};
 use winit::dpi::LogicalSize;
 use winit::event::{Event, VirtualKeyCode};
 use winit::event_loop::{ControlFlow, EventLoop};
-use winit::window::WindowBuilder;
+use winit::window::{Fullscreen, WindowBuilder};
 use winit_input_helper::WinitInputHelper;
+use anyhow::Result;
 
 use crate::binocle::Binocle;
 use crate::gui::Gui;
 use crate::settings::{HEIGHT, WIDTH};
 
-pub fn run(filename: &OsStr) -> Result<(), Error> {
+pub fn run(filename: &OsStr) -> Result<()> {
     env_logger::init();
     let event_loop = EventLoop::new();
     let mut input = WinitInputHelper::new();
@@ -37,7 +38,7 @@ pub fn run(filename: &OsStr) -> Result<(), Error> {
         (pixels, gui)
     };
 
-    let mut binocle = Binocle::new(filename);
+    let mut binocle = Binocle::new(filename)?;
 
     event_loop.run(move |event, _, control_flow| {
         // Update egui inputs
@@ -83,6 +84,15 @@ pub fn run(filename: &OsStr) -> Result<(), Error> {
                 {
                     *control_flow = ControlFlow::Exit;
                     return;
+                }
+
+                // Fullscreen
+                if input.key_pressed(VirtualKeyCode::F) {
+                    if window.fullscreen().is_none() {
+                        window.set_fullscreen(Some(Fullscreen::Borderless(None)));
+                    } else {
+                        window.set_fullscreen(None)
+                    }
                 }
 
                 if input.key_pressed(VirtualKeyCode::Plus) {

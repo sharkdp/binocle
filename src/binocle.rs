@@ -3,6 +3,8 @@ use std::fs::File;
 use std::io::{self, BufReader, Read};
 use std::path::Path;
 
+use anyhow::Result;
+
 use crate::settings::{BinocleSettings, PixelStyle, WIDTH};
 
 fn grayscale(b: u8) -> [u8; 4] {
@@ -54,13 +56,13 @@ pub struct Binocle {
 }
 
 impl Binocle {
-    pub fn new(path: &OsStr) -> Self {
+    pub fn new(path: &OsStr) -> Result<Self> {
         let mut buffer = vec![];
-        read_binary(path, &mut buffer).unwrap();
+        read_binary(path, &mut buffer)?;
 
         let buffer_length = buffer.len();
 
-        Self {
+        Ok(Self {
             buffer,
             settings: BinocleSettings {
                 zoom: 0,
@@ -76,7 +78,7 @@ impl Binocle {
                 hex_view: "".into(),
                 hex_ascii: "".into(),
             },
-        }
+        })
     }
 
     fn buffer_index(&self, x: isize, y: isize) -> Option<usize> {

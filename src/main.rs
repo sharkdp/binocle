@@ -6,7 +6,7 @@ mod event_loop;
 mod gui;
 mod settings;
 
-fn main() -> Result<(), pixels::Error> {
+fn main() -> anyhow::Result<()> {
     let mut args = env::args_os();
     args.next();
 
