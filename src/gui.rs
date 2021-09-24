@@ -101,6 +101,7 @@ impl Gui {
                 ui.radio_value(&mut settings.zoom, 4, "4");
                 ui.radio_value(&mut settings.zoom, 8, "8");
                 ui.radio_value(&mut settings.zoom, 16, "16");
+                ui.radio_value(&mut settings.zoom, 32, "32");
             });
             ui.separator();
             ui.add(

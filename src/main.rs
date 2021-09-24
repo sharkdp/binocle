@@ -98,8 +98,8 @@ impl Binocle {
         };
 
         for (i, pixel) in frame.chunks_exact_mut(4).enumerate() {
-            let x = ((i % WIDTH as usize) as usize) / settings.zoom;
-            let y = ((i / WIDTH as usize) as usize) / settings.zoom;
+            let x = (((i as isize) % WIDTH as isize) as isize) / settings.zoom;
+            let y = (((i as isize) / WIDTH as isize) as isize) / settings.zoom;
 
             let color = if x > settings.width {
                 [0, 0, 0, 0]
@@ -107,10 +107,10 @@ impl Binocle {
                 let index = settings.offset
                     + settings.offset_fine
                     + (y * settings.width + x) * settings.stride;
-                if index >= self.buffer.len() {
+                if index < 0 || index >= (self.buffer.len() as isize) {
                     [0, 0, 0, 0]
                 } else {
-                    let byte = self.buffer[index];
+                    let byte = self.buffer[index as usize];
                     style(byte)
                 }
             };
@@ -150,13 +150,14 @@ fn main() -> Result<(), Error> {
     let mut binocle = Binocle::new(&args.next().unwrap_or("tests/bag-small".into()));
     let mut settings = BinocleSettings {
         zoom: 1,
+        max_zoom: 32,
         width: 804,
         offset: 0,
         offset_fine: 0,
         stride: 1,
         pixel_style: PixelStyle::Colorful,
-        buffer_length: binocle.len(),
-        canvas_width: WIDTH as usize,
+        buffer_length: binocle.len() as isize,
+        canvas_width: WIDTH as isize,
     };
 
     event_loop.run(move |event, _, control_flow| {
@@ -200,6 +201,42 @@ fn main() -> Result<(), Error> {
             {
                 *control_flow = ControlFlow::Exit;
                 return;
+            }
+
+            if input.key_pressed(VirtualKeyCode::Plus) {
+                settings.zoom *= 2;
+                if settings.zoom > settings.max_zoom {
+                    settings.zoom = settings.max_zoom;
+                }
+            } else if input.key_pressed(VirtualKeyCode::Minus) {
+                settings.zoom /= 2;
+                if settings.zoom < 1 {
+                    settings.zoom = 1;
+                }
+            }
+
+            if input.key_pressed(VirtualKeyCode::Left) {
+                settings.width -= 1;
+                settings.width = settings.width.max(1);
+            } else if input.key_pressed(VirtualKeyCode::Right) {
+                settings.width += 1;
+                settings.width = settings.width.min(WIDTH as isize);
+            }
+
+            if input.key_pressed(VirtualKeyCode::Up) {
+                settings.offset -= settings.width * 10;
+                settings.offset = settings.offset.max(0);
+            } else if input.key_pressed(VirtualKeyCode::Down) {
+                settings.offset += settings.width * 10;
+                settings.offset = settings.offset.min(settings.buffer_length);
+            }
+
+            if input.key_pressed(VirtualKeyCode::PageUp) {
+                settings.offset -= settings.width * (HEIGHT as isize);
+                settings.offset = settings.offset.max(0);
+            } else if input.key_pressed(VirtualKeyCode::PageDown) {
+                settings.offset += settings.width * (HEIGHT as isize);
+                settings.offset = settings.offset.min(settings.buffer_length);
             }
 
             // Update the scale factor

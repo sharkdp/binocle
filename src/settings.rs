@@ -10,14 +10,16 @@ pub enum PixelStyle {
 }
 
 pub struct BinocleSettings {
-    pub zoom: usize,
-    pub width: usize,
-    pub offset: usize,
-    pub offset_fine: usize,
-    pub stride: usize,
+    pub zoom: isize,
+    pub max_zoom: isize,
+
+    pub width: isize,
+    pub offset: isize,
+    pub offset_fine: isize,
+    pub stride: isize,
 
     pub pixel_style: PixelStyle,
 
-    pub buffer_length: usize,
-    pub canvas_width: usize,
+    pub buffer_length: isize,
+    pub canvas_width: isize,
 }
