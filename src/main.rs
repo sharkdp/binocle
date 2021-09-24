@@ -16,7 +16,7 @@ mod settings;
 use crate::gui::Gui;
 use crate::settings::{BinocleSettings, PixelStyle};
 
-const WIDTH: u32 = 1024;
+const WIDTH: u32 = 1400;
 const HEIGHT: u32 = 1024;
 
 fn grayscale(b: u8) -> [u8; 4] {
@@ -98,8 +98,9 @@ impl Binocle {
         };
 
         for (i, pixel) in frame.chunks_exact_mut(4).enumerate() {
-            let x = (((i as isize) % WIDTH as isize) as isize) / settings.zoom;
-            let y = (((i as isize) / WIDTH as isize) as isize) / settings.zoom;
+            let zoom_factor = 2isize.pow(settings.zoom as u32);
+            let x = (((i as isize) % WIDTH as isize) as isize) / zoom_factor;
+            let y = (((i as isize) / WIDTH as isize) as isize) / zoom_factor;
 
             let color = if x > settings.width {
                 [0, 0, 0, 0]
@@ -149,8 +150,8 @@ fn main() -> Result<(), Error> {
     args.next();
     let mut binocle = Binocle::new(&args.next().unwrap_or("tests/bag-small".into()));
     let mut settings = BinocleSettings {
-        zoom: 1,
-        max_zoom: 32,
+        zoom: 0,
+        max_zoom: 6,
         width: 804,
         offset: 0,
         offset_fine: 0,
@@ -204,40 +205,49 @@ fn main() -> Result<(), Error> {
             }
 
             if input.key_pressed(VirtualKeyCode::Plus) {
-                settings.zoom *= 2;
-                if settings.zoom > settings.max_zoom {
-                    settings.zoom = settings.max_zoom;
-                }
+                settings.zoom += 1;
             } else if input.key_pressed(VirtualKeyCode::Minus) {
-                settings.zoom /= 2;
-                if settings.zoom < 1 {
-                    settings.zoom = 1;
-                }
+                settings.zoom -= 1;
             }
 
             if input.key_pressed(VirtualKeyCode::Left) {
                 settings.width -= 1;
-                settings.width = settings.width.max(1);
             } else if input.key_pressed(VirtualKeyCode::Right) {
                 settings.width += 1;
-                settings.width = settings.width.min(WIDTH as isize);
             }
 
             if input.key_pressed(VirtualKeyCode::Up) {
-                settings.offset -= settings.width * 10;
-                settings.offset = settings.offset.max(0);
+                settings.offset -= settings.width * settings.stride * 10;
             } else if input.key_pressed(VirtualKeyCode::Down) {
-                settings.offset += settings.width * 10;
-                settings.offset = settings.offset.min(settings.buffer_length);
+                settings.offset += settings.width * settings.stride * 10;
             }
 
             if input.key_pressed(VirtualKeyCode::PageUp) {
-                settings.offset -= settings.width * (HEIGHT as isize);
-                settings.offset = settings.offset.max(0);
+                settings.offset -= settings.width * settings.stride * (HEIGHT as isize);
             } else if input.key_pressed(VirtualKeyCode::PageDown) {
-                settings.offset += settings.width * (HEIGHT as isize);
-                settings.offset = settings.offset.min(settings.buffer_length);
+                settings.offset += settings.width * settings.stride * (HEIGHT as isize);
             }
+
+            if input.scroll_diff().abs() > 0.5 {
+                let scroll = input.scroll_diff() as isize;
+                if input.held_control() {
+                    settings.zoom += scroll;
+                } else if input.held_alt() {
+                    settings.width -= scroll;
+                } else {
+                    let factor = if input.held_shift() { 1 } else { 160 };
+                    settings.offset -= scroll * settings.width * settings.stride * factor;
+                }
+            }
+
+            settings.zoom = settings.zoom.max(0);
+            settings.zoom = settings.zoom.min(settings.max_zoom);
+
+            settings.width = settings.width.max(1);
+            settings.width = settings.width.min(WIDTH as isize);
+
+            settings.offset = settings.offset.max(0);
+            settings.offset = settings.offset.min(settings.buffer_length);
 
             // Update the scale factor
             if let Some(scale_factor) = input.scale_factor() {

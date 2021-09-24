@@ -94,16 +94,12 @@ impl Gui {
             });
 
         egui::SidePanel::right("Settings").show(ctx, |ui| {
-            ui.label("Zoom");
-            ui.horizontal(|ui| {
-                ui.radio_value(&mut settings.zoom, 1, "1");
-                ui.radio_value(&mut settings.zoom, 2, "2");
-                ui.radio_value(&mut settings.zoom, 4, "4");
-                ui.radio_value(&mut settings.zoom, 8, "8");
-                ui.radio_value(&mut settings.zoom, 16, "16");
-                ui.radio_value(&mut settings.zoom, 32, "32");
-            });
-            ui.separator();
+            ui.add(
+                egui::Slider::new(&mut settings.zoom, 0..=settings.max_zoom)
+                    .clamp_to_range(true)
+                    .smart_aim(false)
+                    .text("zoom"),
+            );
             ui.add(
                 egui::Slider::new(&mut settings.width, 8..=settings.canvas_width)
                     .clamp_to_range(true)
@@ -139,10 +135,26 @@ impl Gui {
                 "Grayscale",
             );
             ui.selectable_value(&mut settings.pixel_style, PixelStyle::Category, "Category");
-            ui.selectable_value(&mut settings.pixel_style, PixelStyle::GradientMagma, "Gradient (Magma)");
-            ui.selectable_value(&mut settings.pixel_style, PixelStyle::GradientPlasma, "Gradient (Plasma)");
-            ui.selectable_value(&mut settings.pixel_style, PixelStyle::GradientViridis, "Gradient (Viridis)");
-            ui.selectable_value(&mut settings.pixel_style, PixelStyle::GradientRainbow, "Gradient (Rainbow)");
+            ui.selectable_value(
+                &mut settings.pixel_style,
+                PixelStyle::GradientMagma,
+                "Gradient (Magma)",
+            );
+            ui.selectable_value(
+                &mut settings.pixel_style,
+                PixelStyle::GradientPlasma,
+                "Gradient (Plasma)",
+            );
+            ui.selectable_value(
+                &mut settings.pixel_style,
+                PixelStyle::GradientViridis,
+                "Gradient (Viridis)",
+            );
+            ui.selectable_value(
+                &mut settings.pixel_style,
+                PixelStyle::GradientRainbow,
+                "Gradient (Rainbow)",
+            );
             ui.separator();
         });
     }
