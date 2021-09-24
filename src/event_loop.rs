@@ -1,3 +1,5 @@
+use std::ffi::OsStr;
+
 use log::error;
 use pixels::{Error, Pixels, SurfaceTexture};
 use winit::dpi::LogicalSize;
@@ -10,7 +12,7 @@ use crate::binocle::Binocle;
 use crate::gui::Gui;
 use crate::settings::{HEIGHT, WIDTH};
 
-pub fn run() -> Result<(), Error> {
+pub fn run(filename: &OsStr) -> Result<(), Error> {
     env_logger::init();
     let event_loop = EventLoop::new();
     let mut input = WinitInputHelper::new();
@@ -35,9 +37,7 @@ pub fn run() -> Result<(), Error> {
         (pixels, gui)
     };
 
-    let mut args = std::env::args();
-    args.next();
-    let mut binocle = Binocle::new(&args.next().unwrap_or("tests/bag-small".into()));
+    let mut binocle = Binocle::new(filename);
 
     event_loop.run(move |event, _, control_flow| {
         // Update egui inputs

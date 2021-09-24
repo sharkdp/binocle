@@ -1,3 +1,4 @@
+use std::ffi::OsStr;
 use std::fs::File;
 use std::io::{self, BufReader, Read};
 use std::path::Path;
@@ -53,7 +54,7 @@ pub struct Binocle {
 }
 
 impl Binocle {
-    pub fn new(path: &str) -> Self {
+    pub fn new(path: &OsStr) -> Self {
         let mut buffer = vec![];
         read_binary(path, &mut buffer).unwrap();
 
