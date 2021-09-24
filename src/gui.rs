@@ -106,7 +106,7 @@ impl Gui {
                     .text("width"),
             );
             ui.add(
-                egui::Slider::new(&mut settings.offset, 0..=settings.buffer_length)
+                egui::Slider::new(&mut settings.offset, 0..=(settings.buffer_length / settings.width))
                     .clamp_to_range(true)
                     .smart_aim(false)
                     .text("offset"),
