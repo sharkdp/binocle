@@ -63,6 +63,7 @@ fn read_binary<P: AsRef<Path>>(path: P, buffer: &mut Vec<u8>) -> io::Result<()> 
 }
 
 struct Binocle {
+    settings: BinocleSettings,
     buffer: Vec<u8>,
 }
 
@@ -70,23 +71,68 @@ impl Binocle {
     fn new(path: &str) -> Self {
         let mut buffer = vec![];
         read_binary(path, &mut buffer).unwrap();
-        Self { buffer }
+
+        let buffer_length = buffer.len();
+
+        Self {
+            buffer,
+            settings: BinocleSettings {
+                zoom: 0,
+                max_zoom: 6,
+                width: 804,
+                offset: 0,
+                offset_fine: 0,
+                stride: 1,
+                max_stride: 128,
+                pixel_style: PixelStyle::Colorful,
+                buffer_length: buffer_length as isize,
+                canvas_width: WIDTH as isize,
+                hex_view: "".into(),
+                hex_ascii: "".into(),
+            },
+        }
     }
 
-    fn len(&self) -> usize {
-        self.buffer.len()
+    fn buffer_index(&self, x: isize, y: isize) -> Option<usize> {
+        let index = self.settings.offset
+            + self.settings.offset_fine
+            + (y * self.settings.width + x) * self.settings.stride;
+
+        if index < 0 || index >= (self.buffer.len() as isize) {
+            None
+        } else {
+            Some(index as usize)
+        }
     }
 
     fn update(&mut self) {
-        // let width = WIDTH;
+        let mut hex_view = String::new();
+        let mut hex_ascii = String::new();
+        if let Some(index) = self.buffer_index(0, 0) {
+            for (i, byte) in self.buffer[index..].iter().take(16 * 24).enumerate() {
+                if i > 0 && i % 16 == 0 {
+                    hex_view.push('\n');
+                    hex_ascii.push('\n');
+                } else if i > 0 && i % 8 == 0 {
+                    hex_view.push(' ');
+                }
 
-        // let height = (self.buffer.len() as u32) / width;
-        // let len_truncated = (width as usize) * (height as usize);
+                hex_view.push_str(&format!("{:02x} ", byte));
 
-        // write_png(width, height, &pixel_buffer);
+                if byte.is_ascii_graphic() || (*byte as char) == ' ' {
+                    hex_ascii.push(*byte as char);
+                } else {
+                    hex_ascii.push('·');
+                }
+            }
+        }
+        self.settings.hex_view = hex_view;
+        self.settings.hex_ascii = hex_ascii;
     }
 
-    fn draw(&self, frame: &mut [u8], settings: &BinocleSettings) {
+    fn draw(&self, frame: &mut [u8]) {
+        let settings = &self.settings;
+
         let style: Box<dyn Fn(u8) -> [u8; 4]> = match settings.pixel_style {
             PixelStyle::Category => Box::new(category),
             PixelStyle::Colorful => Box::new(colorful),
@@ -105,14 +151,11 @@ impl Binocle {
             let color = if x > settings.width {
                 [0, 0, 0, 0]
             } else {
-                let index = settings.offset
-                    + settings.offset_fine
-                    + (y * settings.width + x) * settings.stride;
-                if index < 0 || index >= (self.buffer.len() as isize) {
-                    [0, 0, 0, 0]
-                } else {
-                    let byte = self.buffer[index as usize];
+                if let Some(index) = self.buffer_index(x, y) {
+                    let byte = self.buffer[index];
                     style(byte)
+                } else {
+                    [0, 0, 0, 0]
                 }
             };
 
@@ -149,17 +192,6 @@ fn main() -> Result<(), Error> {
     let mut args = std::env::args();
     args.next();
     let mut binocle = Binocle::new(&args.next().unwrap_or("tests/bag-small".into()));
-    let mut settings = BinocleSettings {
-        zoom: 0,
-        max_zoom: 6,
-        width: 804,
-        offset: 0,
-        offset_fine: 0,
-        stride: 1,
-        pixel_style: PixelStyle::Colorful,
-        buffer_length: binocle.len() as isize,
-        canvas_width: WIDTH as isize,
-    };
 
     event_loop.run(move |event, _, control_flow| {
         // Update egui inputs
@@ -168,10 +200,10 @@ fn main() -> Result<(), Error> {
         // Draw the current frame
         if let Event::RedrawRequested(_) = event {
             // Draw the binocle
-            binocle.draw(pixels.get_frame(), &settings);
+            binocle.draw(pixels.get_frame());
 
             // Prepare egui
-            gui.prepare(&window, &mut settings);
+            gui.prepare(&window, &mut binocle.settings);
 
             // Render everything together
             let render_result = pixels.render_with(|encoder, render_target, context| {
@@ -195,77 +227,97 @@ fn main() -> Result<(), Error> {
 
         // Handle input events
         if input.update(&event) {
-            // Close events
-            if input.key_pressed(VirtualKeyCode::Escape)
-                || input.key_pressed(VirtualKeyCode::Q)
-                || input.quit()
             {
-                *control_flow = ControlFlow::Exit;
-                return;
-            }
+                let mut settings = &mut binocle.settings;
 
-            if input.key_pressed(VirtualKeyCode::Plus) {
-                settings.zoom += 1;
-            } else if input.key_pressed(VirtualKeyCode::Minus) {
-                settings.zoom -= 1;
-            }
-
-            if input.key_pressed(VirtualKeyCode::Left) {
-                settings.width -= 1;
-            } else if input.key_pressed(VirtualKeyCode::Right) {
-                settings.width += 1;
-            }
-
-            let offset_factor = if input.held_shift() { 1 } else { 160 };
-
-            if input.key_pressed(VirtualKeyCode::Up) {
-                settings.offset -= offset_factor * settings.width * settings.stride;
-            } else if input.key_pressed(VirtualKeyCode::Down) {
-                settings.offset += offset_factor * settings.width * settings.stride;
-            }
-
-            if input.key_pressed(VirtualKeyCode::PageUp) {
-                settings.offset -= settings.width * settings.stride * (HEIGHT as isize);
-            } else if input.key_pressed(VirtualKeyCode::PageDown) {
-                settings.offset += settings.width * settings.stride * (HEIGHT as isize);
-            }
-
-            if input.key_pressed(VirtualKeyCode::Home) {
-                settings.offset = 0;
-            } else if input.key_pressed(VirtualKeyCode::End) {
-                settings.offset =
-                    settings.buffer_length - settings.width * (HEIGHT as isize) * settings.stride;
-            }
-
-            if input.scroll_diff().abs() > 0.5 {
-                let scroll = input.scroll_diff() as isize;
-                if input.held_control() {
-                    settings.zoom += scroll;
-                } else if input.held_alt() {
-                    settings.width -= scroll;
-                } else {
-                    settings.offset -= offset_factor * scroll * settings.width * settings.stride;
+                // Close events
+                if input.key_pressed(VirtualKeyCode::Escape)
+                    || input.key_pressed(VirtualKeyCode::Q)
+                    || input.quit()
+                {
+                    *control_flow = ControlFlow::Exit;
+                    return;
                 }
-            }
 
-            settings.zoom = settings.zoom.max(0);
-            settings.zoom = settings.zoom.min(settings.max_zoom);
+                if input.key_pressed(VirtualKeyCode::Plus) {
+                    settings.zoom += 1;
+                } else if input.key_pressed(VirtualKeyCode::Minus) {
+                    settings.zoom -= 1;
+                }
 
-            settings.width = settings.width.max(1);
-            settings.width = settings.width.min(WIDTH as isize);
+                if input.key_pressed(VirtualKeyCode::Left) {
+                    settings.width -= 1;
+                } else if input.key_pressed(VirtualKeyCode::Right) {
+                    settings.width += 1;
+                }
 
-            settings.offset = settings.offset.max(0);
-            settings.offset = settings.offset.min(settings.buffer_length);
+                let offset_factor = if input.held_shift() { 1 } else { 160 };
 
-            // Update the scale factor
-            if let Some(scale_factor) = input.scale_factor() {
-                gui.scale_factor(scale_factor);
-            }
+                if input.key_pressed(VirtualKeyCode::Up) {
+                    settings.offset -= offset_factor * settings.width * settings.stride;
+                } else if input.key_pressed(VirtualKeyCode::Down) {
+                    settings.offset += offset_factor * settings.width * settings.stride;
+                }
 
-            // Resize the window
-            if let Some(size) = input.window_resized() {
-                pixels.resize_surface(size.width, size.height);
-                gui.resize(size.width, size.height);
+                if input.key_pressed(VirtualKeyCode::N) {
+                    settings.offset -= 1;
+                } else if input.key_pressed(VirtualKeyCode::M) {
+                    settings.offset += 1;
+                }
+
+                if input.key_pressed(VirtualKeyCode::Comma) {
+                    settings.stride -= 1;
+                } else if input.key_pressed(VirtualKeyCode::Period) {
+                    settings.stride += 1;
+                }
+
+                if input.key_pressed(VirtualKeyCode::PageUp) {
+                    settings.offset -= settings.width * settings.stride * (HEIGHT as isize);
+                } else if input.key_pressed(VirtualKeyCode::PageDown) {
+                    settings.offset += settings.width * settings.stride * (HEIGHT as isize);
+                }
+
+                if input.key_pressed(VirtualKeyCode::Home) {
+                    settings.offset = 0;
+                } else if input.key_pressed(VirtualKeyCode::End) {
+                    settings.offset = settings.buffer_length
+                        - settings.width * (HEIGHT as isize) * settings.stride;
+                }
+
+                if input.scroll_diff().abs() > 0.5 {
+                    let scroll = input.scroll_diff() as isize;
+                    if input.held_control() {
+                        settings.zoom += scroll;
+                    } else if input.held_alt() {
+                        settings.width -= scroll;
+                    } else {
+                        settings.offset -=
+                            offset_factor * scroll * settings.width * settings.stride;
+                    }
+                }
+
+                settings.zoom = settings.zoom.max(0);
+                settings.zoom = settings.zoom.min(settings.max_zoom);
+
+                settings.width = settings.width.max(1);
+                settings.width = settings.width.min(WIDTH as isize);
+
+                settings.offset = settings.offset.max(0);
+                settings.offset = settings.offset.min(settings.buffer_length);
+
+                settings.stride = settings.stride.max(1);
+                settings.stride = settings.stride.min(settings.max_stride);
+
+                // Update the scale factor
+                if let Some(scale_factor) = input.scale_factor() {
+                    gui.scale_factor(scale_factor);
+                }
+
+                // Resize the window
+                if let Some(size) = input.window_resized() {
+                    pixels.resize_surface(size.width, size.height);
+                    gui.resize(size.width, size.height);
+                }
             }
 
             // Update internal state and request a redraw

@@ -16,6 +16,7 @@ pub struct Gui {
     paint_jobs: Vec<ClippedMesh>,
 
     // App state
+    hex_view_open: bool,
     about_dialog_open: bool,
 }
 
@@ -41,6 +42,7 @@ impl Gui {
             screen_descriptor,
             rpass,
             paint_jobs: Vec::new(),
+            hex_view_open: false,
             about_dialog_open: false,
         }
     }
@@ -80,7 +82,10 @@ impl Gui {
         egui::TopBottomPanel::top("menubar_container").show(ctx, |ui| {
             egui::menu::bar(ui, |ui| {
                 egui::menu::menu(ui, "File", |ui| {
-                    if ui.button("About...").clicked() {
+                    if ui.button("hex view").clicked() {
+                        self.hex_view_open = true;
+                    }
+                    if ui.button("about").clicked() {
                         self.about_dialog_open = true;
                     }
                 })
@@ -98,19 +103,19 @@ impl Gui {
                 egui::Slider::new(&mut settings.zoom, 0..=settings.max_zoom)
                     .clamp_to_range(true)
                     .smart_aim(false)
-                    .text("zoom"),
+                    .text("zoom (+/-)"),
             );
             ui.add(
                 egui::Slider::new(&mut settings.width, 8..=settings.canvas_width)
                     .clamp_to_range(true)
                     .smart_aim(false)
-                    .text("width"),
+                    .text("width (left/right)"),
             );
             ui.add(
-                egui::Slider::new(&mut settings.stride, 1..=32)
+                egui::Slider::new(&mut settings.stride, 1..=settings.max_stride)
                     .clamp_to_range(true)
                     .smart_aim(false)
-                    .text("stride"),
+                    .text("stride (,/.)"),
             );
             ui.separator();
             ui.label("Offset");
@@ -118,13 +123,13 @@ impl Gui {
                 egui::Slider::new(&mut settings.offset, 0..=settings.buffer_length)
                     .clamp_to_range(true)
                     .smart_aim(false)
-                    .text("coarse"),
+                    .text("coarse ([shift +] up/down)"),
             );
             ui.add(
                 egui::Slider::new(&mut settings.offset_fine, 0..=settings.width)
                     .clamp_to_range(true)
                     .smart_aim(false)
-                    .text("fine"),
+                    .text("fine (m/n)"),
             );
             ui.separator();
             ui.label("Pixel style");
@@ -156,7 +161,30 @@ impl Gui {
                 "Gradient (Rainbow)",
             );
             ui.separator();
+            ui.checkbox(&mut self.hex_view_open, "hex view");
         });
+
+        egui::Window::new("hex view")
+            .open(&mut self.hex_view_open)
+            .default_width(540.0)
+            .resizable(false)
+            .show(ctx, |ui| {
+                ui.horizontal(|ui| {
+                    ui.add(
+                        egui::TextEdit::multiline(&mut settings.hex_view)
+                            .text_style(egui::TextStyle::Monospace)
+                            .enabled(false)
+                            .frame(false)
+                            .desired_width(360.0),
+                    );
+                    ui.add(
+                        egui::TextEdit::multiline(&mut settings.hex_ascii)
+                            .text_style(egui::TextStyle::Monospace)
+                            .enabled(false)
+                            .frame(false), // .desired_width(200.0)
+                    );
+                });
+            });
     }
 
     /// Render egui.
