@@ -5,7 +5,7 @@ use std::path::Path;
 
 use anyhow::Result;
 
-use crate::settings::{BinocleSettings, PixelStyle, WIDTH};
+use crate::settings::{Settings, PixelStyle, WIDTH};
 
 fn grayscale(b: u8) -> [u8; 4] {
     [b, b, b, 255]
@@ -51,7 +51,7 @@ fn read_binary<P: AsRef<Path>>(path: P, buffer: &mut Vec<u8>) -> io::Result<()> 
 }
 
 pub struct Binocle {
-    pub settings: BinocleSettings,
+    pub settings: Settings,
     buffer: Vec<u8>,
 }
 
@@ -64,7 +64,7 @@ impl Binocle {
 
         Ok(Self {
             buffer,
-            settings: BinocleSettings {
+            settings: Settings {
                 zoom: 0,
                 max_zoom: 6,
                 width: 804,

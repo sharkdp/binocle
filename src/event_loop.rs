@@ -1,5 +1,6 @@
 use std::ffi::OsStr;
 
+use anyhow::Result;
 use log::error;
 use pixels::{Pixels, SurfaceTexture};
 use winit::dpi::LogicalSize;
@@ -7,7 +8,6 @@ use winit::event::{Event, VirtualKeyCode};
 use winit::event_loop::{ControlFlow, EventLoop};
 use winit::window::{Fullscreen, WindowBuilder};
 use winit_input_helper::WinitInputHelper;
-use anyhow::Result;
 
 use crate::binocle::Binocle;
 use crate::gui::Gui;

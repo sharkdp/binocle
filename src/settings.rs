@@ -12,7 +12,7 @@ pub enum PixelStyle {
     GradientRainbow,
 }
 
-pub struct BinocleSettings {
+pub struct Settings {
     pub zoom: isize,
     pub max_zoom: isize,
 

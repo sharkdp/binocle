@@ -5,7 +5,7 @@ use pixels::{wgpu, PixelsContext};
 use std::time::Instant;
 use winit::window::Window;
 
-use crate::settings::{BinocleSettings, PixelStyle};
+use crate::settings::{Settings, PixelStyle};
 
 pub struct Gui {
     // State for egui.
@@ -62,7 +62,7 @@ impl Gui {
         self.screen_descriptor.scale_factor = scale_factor as f32;
     }
 
-    pub fn prepare(&mut self, window: &Window, settings: &mut BinocleSettings) {
+    pub fn prepare(&mut self, window: &Window, settings: &mut Settings) {
         self.platform
             .update_time(self.start_time.elapsed().as_secs_f64());
 
@@ -78,7 +78,7 @@ impl Gui {
     }
 
     /// Create the UI using egui.
-    fn ui(&mut self, ctx: &egui::CtxRef, settings: &mut BinocleSettings) {
+    fn ui(&mut self, ctx: &egui::CtxRef, settings: &mut Settings) {
         egui::TopBottomPanel::top("menubar_container").show(ctx, |ui| {
             egui::menu::bar(ui, |ui| {
                 egui::menu::menu(ui, "File", |ui| {
