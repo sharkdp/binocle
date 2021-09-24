@@ -104,7 +104,7 @@ impl Binocle {
             let color = if x > settings.width {
                 [0, 0, 0, 0]
             } else {
-                let index = settings.offset * settings.width
+                let index = settings.offset
                     + settings.offset_fine
                     + (y * settings.width + x) * settings.stride;
                 if index >= self.buffer.len() {
