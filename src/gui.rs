@@ -5,7 +5,7 @@ use pixels::{wgpu, PixelsContext};
 use std::time::Instant;
 use winit::window::Window;
 
-use crate::settings::{Settings, PixelStyle};
+use crate::settings::{PixelStyle, Settings};
 
 pub struct Gui {
     // State for egui.
@@ -16,7 +16,6 @@ pub struct Gui {
     paint_jobs: Vec<ClippedMesh>,
 
     // App state
-    hex_view_open: bool,
     about_dialog_open: bool,
 }
 
@@ -42,7 +41,6 @@ impl Gui {
             screen_descriptor,
             rpass,
             paint_jobs: Vec::new(),
-            hex_view_open: false,
             about_dialog_open: false,
         }
     }
@@ -83,7 +81,7 @@ impl Gui {
             egui::menu::bar(ui, |ui| {
                 egui::menu::menu(ui, "File", |ui| {
                     if ui.button("hex view").clicked() {
-                        self.hex_view_open = true;
+                        settings.hex_view_visible = !settings.hex_view_visible;
                     }
                     if ui.button("about").clicked() {
                         self.about_dialog_open = true;
@@ -161,30 +159,28 @@ impl Gui {
                 "Gradient (Rainbow)",
             );
             ui.separator();
-            ui.checkbox(&mut self.hex_view_open, "hex view");
+            ui.checkbox(&mut settings.hex_view_visible, "hex view");
         });
 
-        egui::Window::new("hex view")
-            .open(&mut self.hex_view_open)
-            .default_width(540.0)
-            .resizable(false)
-            .show(ctx, |ui| {
+        if settings.hex_view_visible {
+            egui::TopBottomPanel::bottom("hex view").show(ctx, |ui| {
                 ui.horizontal(|ui| {
                     ui.add(
                         egui::TextEdit::multiline(&mut settings.hex_view)
                             .text_style(egui::TextStyle::Monospace)
                             .enabled(false)
                             .frame(false)
-                            .desired_width(360.0),
+                            .desired_width(720.0),
                     );
                     ui.add(
                         egui::TextEdit::multiline(&mut settings.hex_ascii)
                             .text_style(egui::TextStyle::Monospace)
                             .enabled(false)
-                            .frame(false), // .desired_width(200.0)
+                            .frame(false),
                     );
                 });
             });
+        }
     }
 
     /// Render egui.

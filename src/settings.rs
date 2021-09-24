@@ -28,6 +28,7 @@ pub struct Settings {
     pub buffer_length: isize,
     pub canvas_width: isize,
 
+    pub hex_view_visible: bool,
     pub hex_view: String,
     pub hex_ascii: String,
 }

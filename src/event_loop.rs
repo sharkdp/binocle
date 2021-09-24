@@ -95,6 +95,11 @@ pub fn run(filename: &OsStr) -> Result<()> {
                     }
                 }
 
+                // Hex view
+                if input.key_pressed(VirtualKeyCode::H) {
+                    settings.hex_view_visible = !settings.hex_view_visible;
+                }
+
                 if input.key_pressed(VirtualKeyCode::Plus) {
                     settings.zoom += 1;
                 } else if input.key_pressed(VirtualKeyCode::Minus) {

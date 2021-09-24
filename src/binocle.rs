@@ -5,7 +5,7 @@ use std::path::Path;
 
 use anyhow::Result;
 
-use crate::settings::{Settings, PixelStyle, WIDTH};
+use crate::settings::{PixelStyle, Settings, WIDTH};
 
 fn grayscale(b: u8) -> [u8; 4] {
     [b, b, b, 255]
@@ -75,6 +75,7 @@ impl Binocle {
                 pixel_style: PixelStyle::Colorful,
                 buffer_length: buffer_length as isize,
                 canvas_width: WIDTH as isize,
+                hex_view_visible: false,
                 hex_view: "".into(),
                 hex_ascii: "".into(),
             },
@@ -94,11 +95,15 @@ impl Binocle {
     }
 
     pub fn update(&mut self) {
+        if !self.settings.hex_view_visible {
+            return;
+        }
+
         let mut hex_view = String::new();
         let mut hex_ascii = String::new();
         if let Some(index) = self.buffer_index(0, 0) {
-            for (i, byte) in self.buffer[index..].iter().take(16 * 24).enumerate() {
-                if i > 0 && i % 16 == 0 {
+            for (i, byte) in self.buffer[index..].iter().take(32 * 24).enumerate() {
+                if i > 0 && i % 32 == 0 {
                     hex_view.push('\n');
                     hex_ascii.push('\n');
                 } else if i > 0 && i % 8 == 0 {
