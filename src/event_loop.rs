@@ -150,7 +150,7 @@ pub fn run(filename: &OsStr) -> Result<()> {
                     if input.held_control() {
                         settings.zoom += scroll;
                     } else if input.held_alt() {
-                        settings.width -= scroll;
+                        settings.width += scroll;
                     } else {
                         settings.offset -=
                             offset_factor * scroll * settings.width * settings.stride;
