@@ -1,12 +1,10 @@
 use std::ffi::OsStr;
-use std::fs::File;
-use std::io::{self, BufReader, Read};
-use std::path::Path;
 
 use anyhow::Result;
 
 use crate::buffer::Buffer;
 use crate::settings::{PixelStyle, Settings, WIDTH};
+use crate::view::View;
 
 fn grayscale(b: u8) -> [u8; 4] {
     [b, b, b, 255]
@@ -127,6 +125,13 @@ impl Binocle {
             PixelStyle::GradientRainbow => color_gradient(colorgrad::rainbow()),
         };
 
+        let view = View::new(
+            &self.buffer,
+            settings.offset + settings.offset_fine,
+            settings.stride,
+        );
+        let mut bytes = view.iter();
+
         for (i, pixel) in frame.chunks_exact_mut(4).enumerate() {
             let zoom_factor = 2isize.pow(settings.zoom as u32);
             let x = (((i as isize) % WIDTH as isize) as isize) / zoom_factor;
@@ -135,8 +140,7 @@ impl Binocle {
             let color = if x > settings.width {
                 [0, 0, 0, 0]
             } else {
-                if let Some(index) = self.buffer_index(x, y) {
-                    let byte = self.buffer[index];
+                if let Some(byte) = bytes.next() {
                     style(byte)
                 } else {
                     [0, 0, 0, 0]
