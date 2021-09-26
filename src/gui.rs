@@ -135,6 +135,16 @@ impl Gui {
                 PixelStyle::GradientRainbow,
                 "Gradient (Rainbow)",
             );
+            ui.selectable_value(
+                &mut settings.pixel_style,
+                PixelStyle::RGBA,
+                "RGBA",
+            );
+            ui.selectable_value(
+                &mut settings.pixel_style,
+                PixelStyle::RGB,
+                "RGB",
+            );
             ui.separator();
             ui.checkbox(&mut settings.hex_view_visible, "hex view");
         });

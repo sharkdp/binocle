@@ -1,5 +1,5 @@
-pub const WIDTH: u32 = 1280;
-pub const HEIGHT: u32 = 960;
+pub const WIDTH: u32 = 1366;
+pub const HEIGHT: u32 = 1024;
 
 #[derive(PartialEq)]
 pub enum PixelStyle {
@@ -10,6 +10,8 @@ pub enum PixelStyle {
     GradientPlasma,
     GradientViridis,
     GradientRainbow,
+    RGBA,
+    RGB,
 }
 
 pub struct Settings {

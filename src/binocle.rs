@@ -40,6 +40,31 @@ fn color_gradient(gradient: colorgrad::Gradient) -> Box<dyn Fn(u8) -> [u8; 4]> {
     })
 }
 
+fn u32_viridis(i: u32) -> [u8; 4] {
+    let color = colorgrad::viridis().at((i as f64) / (u32::MAX as f64));
+    [
+        (color.r * 255.0) as u8,
+        (color.g * 255.0) as u8,
+        (color.b * 255.0) as u8,
+        255,
+    ]
+}
+
+fn u16_viridis(i: u16) -> [u8; 4] {
+    let color = colorgrad::viridis().at((i as f64) / (u16::MAX as f64));
+    [
+        (color.r * 255.0) as u8,
+        (color.g * 255.0) as u8,
+        (color.b * 255.0) as u8,
+        255,
+    ]
+}
+
+fn u16_colorful(i: u16) -> [u8; 4] {
+    let bytes: [u8; 2] = i.to_le_bytes();
+    [bytes[0], bytes[1], 255, 255]
+}
+
 pub struct Binocle {
     pub settings: Settings,
     buffer: Buffer,
@@ -113,21 +138,54 @@ impl Binocle {
     pub fn draw(&self, frame: &mut [u8]) {
         let settings = &self.settings;
 
-        let style: Box<dyn Fn(u8) -> [u8; 4]> = match settings.pixel_style {
-            PixelStyle::Category => Box::new(category),
-            PixelStyle::Colorful => Box::new(colorful),
-            PixelStyle::Grayscale => Box::new(grayscale),
-            PixelStyle::GradientMagma => color_gradient(colorgrad::magma()),
-            PixelStyle::GradientPlasma => color_gradient(colorgrad::plasma()),
-            PixelStyle::GradientViridis => color_gradient(colorgrad::viridis()),
-            PixelStyle::GradientRainbow => color_gradient(colorgrad::rainbow()),
-        };
-
         let view = View::new(
             &self.buffer.data(),
             settings.offset + settings.offset_fine,
             settings.stride,
         );
+
+        let color_at_index: Box<dyn Fn(isize) -> [u8; 4]> = match settings.pixel_style {
+            PixelStyle::Category => Box::new(|i| {
+                if let Some(byte) = view.byte_at(i) {
+                    category(byte)
+                } else {
+                    [0, 0, 0, 0]
+                }
+            }),
+            PixelStyle::Colorful => Box::new(|i| {
+                if let Some(byte) = view.byte_at(i) {
+                    colorful(byte)
+                } else {
+                    [0, 0, 0, 0]
+                }
+            }),
+            PixelStyle::Grayscale => Box::new(|i| {
+                if let Some(byte) = view.byte_at(i) {
+                    grayscale(byte)
+                } else {
+                    [0, 0, 0, 0]
+                }
+            }),
+            PixelStyle::RGBA => Box::new(|i| {
+                if let Some(int) = view.le_u32_at(i) {
+                    int.to_be_bytes()
+                } else {
+                    [0, 0, 0, 0]
+                }
+            }),
+            PixelStyle::RGBA => Box::new(|i| {
+                if let Some(int) = view.le_u32_at(i) {
+                    int.to_be_bytes()
+                } else {
+                    [0, 0, 0, 0]
+                }
+            }),
+            // PixelStyle::GradientMagma => color_gradient(colorgrad::magma()),
+            // PixelStyle::GradientPlasma => color_gradient(colorgrad::plasma()),
+            // PixelStyle::GradientViridis => color_gradient(colorgrad::viridis()),
+            // PixelStyle::GradientRainbow => color_gradient(colorgrad::rainbow()),
+            _ => unimplemented!("Style not yet implemented"),
+        };
 
         for (i, pixel) in frame.chunks_exact_mut(4).enumerate() {
             let zoom_factor = 2isize.pow(settings.zoom as u32);
@@ -139,11 +197,7 @@ impl Binocle {
             } else {
                 let view_index = y * settings.width + x;
 
-                if let Some(byte) = view.byte_at(view_index) {
-                    style(byte)
-                } else {
-                    [0, 0, 0, 0]
-                }
+                color_at_index(view_index)
             };
 
             pixel.copy_from_slice(&color);
