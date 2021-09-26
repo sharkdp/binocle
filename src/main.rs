@@ -2,9 +2,11 @@ use std::env;
 use std::process;
 
 mod binocle;
+mod buffer;
 mod event_loop;
 mod gui;
 mod settings;
+mod view;
 
 fn main() -> anyhow::Result<()> {
     let mut args = env::args_os();

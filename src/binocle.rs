@@ -5,6 +5,7 @@ use std::path::Path;
 
 use anyhow::Result;
 
+use crate::buffer::Buffer;
 use crate::settings::{PixelStyle, Settings, WIDTH};
 
 fn grayscale(b: u8) -> [u8; 4] {
@@ -41,24 +42,14 @@ fn color_gradient(gradient: colorgrad::Gradient) -> Box<dyn Fn(u8) -> [u8; 4]> {
     })
 }
 
-fn read_binary<P: AsRef<Path>>(path: P, buffer: &mut Vec<u8>) -> io::Result<()> {
-    let file = File::open(path)?;
-    let mut reader = BufReader::new(file);
-
-    reader.read_to_end(buffer)?;
-
-    return Ok(());
-}
-
 pub struct Binocle {
     pub settings: Settings,
-    buffer: Vec<u8>,
+    buffer: Buffer,
 }
 
 impl Binocle {
     pub fn new(path: &OsStr) -> Result<Self> {
-        let mut buffer = vec![];
-        read_binary(path, &mut buffer)?;
+        let buffer = Buffer::from_file(path)?;
 
         let buffer_length = buffer.len();
 
@@ -101,24 +92,24 @@ impl Binocle {
 
         let mut hex_view = String::new();
         let mut hex_ascii = String::new();
-        if let Some(index) = self.buffer_index(0, 0) {
-            for (i, byte) in self.buffer[index..].iter().take(32 * 24).enumerate() {
-                if i > 0 && i % 32 == 0 {
-                    hex_view.push('\n');
-                    hex_ascii.push('\n');
-                } else if i > 0 && i % 8 == 0 {
-                    hex_view.push(' ');
-                }
+        // if let Some(index) = self.buffer_index(0, 0) {
+        //     for (i, byte) in self.buffer[index..].iter().take(32 * 24).enumerate() {
+        //         if i > 0 && i % 32 == 0 {
+        //             hex_view.push('\n');
+        //             hex_ascii.push('\n');
+        //         } else if i > 0 && i % 8 == 0 {
+        //             hex_view.push(' ');
+        //         }
 
-                hex_view.push_str(&format!("{:02x} ", byte));
+        //         hex_view.push_str(&format!("{:02x} ", byte));
 
-                if byte.is_ascii_graphic() || (*byte as char) == ' ' {
-                    hex_ascii.push(*byte as char);
-                } else {
-                    hex_ascii.push('·');
-                }
-            }
-        }
+        //         if byte.is_ascii_graphic() || (*byte as char) == ' ' {
+        //             hex_ascii.push(*byte as char);
+        //         } else {
+        //             hex_ascii.push('·');
+        //         }
+        //     }
+        // }
         self.settings.hex_view = hex_view;
         self.settings.hex_ascii = hex_ascii;
     }
