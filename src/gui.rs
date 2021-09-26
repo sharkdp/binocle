@@ -14,9 +14,6 @@ pub struct Gui {
     screen_descriptor: ScreenDescriptor,
     rpass: RenderPass,
     paint_jobs: Vec<ClippedMesh>,
-
-    // App state
-    about_dialog_open: bool,
 }
 
 impl Gui {
@@ -41,7 +38,6 @@ impl Gui {
             screen_descriptor,
             rpass,
             paint_jobs: Vec::new(),
-            about_dialog_open: false,
         }
     }
 
@@ -77,25 +73,6 @@ impl Gui {
 
     /// Create the UI using egui.
     fn ui(&mut self, ctx: &egui::CtxRef, settings: &mut Settings) {
-        egui::TopBottomPanel::top("menubar_container").show(ctx, |ui| {
-            egui::menu::bar(ui, |ui| {
-                egui::menu::menu(ui, "File", |ui| {
-                    if ui.button("hex view").clicked() {
-                        settings.hex_view_visible = !settings.hex_view_visible;
-                    }
-                    if ui.button("about").clicked() {
-                        self.about_dialog_open = true;
-                    }
-                })
-            });
-        });
-
-        egui::Window::new("binocle")
-            .open(&mut self.about_dialog_open)
-            .show(ctx, |ui| {
-                ui.label("A binary file visualizer");
-            });
-
         egui::SidePanel::right("Settings").show(ctx, |ui| {
             ui.add(
                 egui::Slider::new(&mut settings.zoom, 0..=settings.max_zoom)

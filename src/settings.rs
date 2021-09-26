@@ -1,5 +1,5 @@
-pub const WIDTH: u32 = 1386;
-pub const HEIGHT: u32 = 1024;
+pub const WIDTH: u32 = 1280;
+pub const HEIGHT: u32 = 960;
 
 #[derive(PartialEq)]
 pub enum PixelStyle {

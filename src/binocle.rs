@@ -71,18 +71,6 @@ impl Binocle {
         })
     }
 
-    fn buffer_index(&self, x: isize, y: isize) -> Option<usize> {
-        let index = self.settings.offset
-            + self.settings.offset_fine
-            + (y * self.settings.width + x) * self.settings.stride;
-
-        if index < 0 || index >= (self.buffer.len() as isize) {
-            None
-        } else {
-            Some(index as usize)
-        }
-    }
-
     pub fn update(&mut self) {
         if !self.settings.hex_view_visible {
             return;
@@ -90,24 +78,34 @@ impl Binocle {
 
         let mut hex_view = String::new();
         let mut hex_ascii = String::new();
-        // if let Some(index) = self.buffer_index(0, 0) {
-        //     for (i, byte) in self.buffer[index..].iter().take(32 * 24).enumerate() {
-        //         if i > 0 && i % 32 == 0 {
-        //             hex_view.push('\n');
-        //             hex_ascii.push('\n');
-        //         } else if i > 0 && i % 8 == 0 {
-        //             hex_view.push(' ');
-        //         }
 
-        //         hex_view.push_str(&format!("{:02x} ", byte));
+        let view = View::new(
+            self.buffer.data(),
+            self.settings.offset + self.settings.offset_fine,
+            1,
+        );
 
-        //         if byte.is_ascii_graphic() || (*byte as char) == ' ' {
-        //             hex_ascii.push(*byte as char);
-        //         } else {
-        //             hex_ascii.push('·');
-        //         }
-        //     }
-        // }
+        for i in 0..(32 * 24) {
+            if i > 0 && i % 32 == 0 {
+                hex_view.push('\n');
+                hex_ascii.push('\n');
+            } else if i > 0 && i % 8 == 0 {
+                hex_view.push(' ');
+            }
+
+            if let Some(byte) = view.byte_at(i) {
+                hex_view.push_str(&format!("{:02x} ", byte));
+
+                if byte.is_ascii_graphic() || (byte as char) == ' ' {
+                    hex_ascii.push(byte as char);
+                } else {
+                    hex_ascii.push('·');
+                }
+            } else {
+                hex_view.push_str("  ");
+                hex_ascii.push(' ');
+            }
+        }
         self.settings.hex_view = hex_view;
         self.settings.hex_ascii = hex_ascii;
     }
@@ -126,11 +124,10 @@ impl Binocle {
         };
 
         let view = View::new(
-            &self.buffer,
+            &self.buffer.data(),
             settings.offset + settings.offset_fine,
             settings.stride,
         );
-        let mut bytes = view.iter();
 
         for (i, pixel) in frame.chunks_exact_mut(4).enumerate() {
             let zoom_factor = 2isize.pow(settings.zoom as u32);
@@ -140,7 +137,9 @@ impl Binocle {
             let color = if x > settings.width {
                 [0, 0, 0, 0]
             } else {
-                if let Some(byte) = bytes.next() {
+                let view_index = y * settings.width + x;
+
+                if let Some(byte) = view.byte_at(view_index) {
                     style(byte)
                 } else {
                     [0, 0, 0, 0]

@@ -1,7 +1,6 @@
 use std::{
     fs::File,
     io::{self, BufReader, Read},
-    ops::Index,
     path::Path,
 };
 
@@ -24,12 +23,8 @@ impl Buffer {
     pub fn len(&self) -> usize {
         self.data.len()
     }
-}
 
-impl Index<usize> for Buffer {
-    type Output = u8;
-
-    fn index(&self, index: usize) -> &Self::Output {
-        &self.data[index]
+    pub fn data<'a>(&'a self) -> &'a [u8] {
+        &self.data
     }
 }
