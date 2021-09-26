@@ -168,14 +168,28 @@ impl Binocle {
             }),
             PixelStyle::RGBA => Box::new(|i| {
                 if let Some(int) = view.le_u32_at(i) {
+                    int.to_le_bytes()
+                } else {
+                    [0, 0, 0, 0]
+                }
+            }),
+            PixelStyle::ABGR => Box::new(|i| {
+                if let Some(int) = view.le_u32_at(i) {
                     int.to_be_bytes()
                 } else {
                     [0, 0, 0, 0]
                 }
             }),
-            PixelStyle::RGBA => Box::new(|i| {
-                if let Some(int) = view.le_u32_at(i) {
-                    int.to_be_bytes()
+            PixelStyle::RGB => Box::new(|i| {
+                if let Some([r, g, b]) = view.rgb_at(i) {
+                    [r, g, b, 255]
+                } else {
+                    [0, 0, 0, 0]
+                }
+            }),
+            PixelStyle::BGR => Box::new(|i| {
+                if let Some([b, g, r]) = view.rgb_at(i) {
+                    [r, g, b, 255]
                 } else {
                     [0, 0, 0, 0]
                 }

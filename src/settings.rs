@@ -11,7 +11,9 @@ pub enum PixelStyle {
     GradientViridis,
     GradientRainbow,
     RGBA,
+    ABGR,
     RGB,
+    BGR,
 }
 
 pub struct Settings {

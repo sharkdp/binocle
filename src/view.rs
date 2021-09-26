@@ -49,6 +49,13 @@ impl<'a> View<'a> {
             .and_then(|slice| slice.try_into().ok())
             .map(u16::from_le_bytes)
     }
+
+    pub fn rgb_at(&self, view_index: isize) -> Option<[u8; 3]> {
+        let data_index = self.data_index(view_index);
+        self.data
+            .get(data_index..(data_index + 3))
+            .and_then(|slice| slice.try_into().ok())
+    }
 }
 
 #[test]
