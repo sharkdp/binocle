@@ -92,7 +92,7 @@ pub fn run(filename: &OsStr) -> Result<()> {
 
         // Handle input events
         if input.update(&event) {
-            {
+            if !binocle.settings.gui_wants_keyboard && !binocle.settings.gui_wants_mouse {
                 let mut settings = &mut binocle.settings;
 
                 // Close events

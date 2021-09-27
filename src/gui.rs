@@ -164,6 +164,9 @@ impl Gui {
                 });
             });
         }
+
+        settings.gui_wants_keyboard = ctx.wants_keyboard_input();
+        settings.gui_wants_mouse = ctx.wants_pointer_input();
     }
 
     /// Render egui.

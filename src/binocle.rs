@@ -36,6 +36,8 @@ impl Binocle {
                 hex_view_visible: false,
                 hex_view: "".into(),
                 hex_ascii: "".into(),
+                gui_wants_keyboard: false,
+                gui_wants_mouse: false,
             },
         })
     }

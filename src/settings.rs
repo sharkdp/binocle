@@ -36,6 +36,9 @@ pub struct Settings {
     pub hex_view_visible: bool,
     pub hex_view: String,
     pub hex_ascii: String,
+
+    pub gui_wants_keyboard: bool,
+    pub gui_wants_mouse: bool,
 }
 
 impl Settings {
