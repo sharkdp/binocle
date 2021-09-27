@@ -34,21 +34,13 @@ impl<'a> View<'a> {
         self.data.get(self.data_index(view_index)).copied()
     }
 
-    pub fn le_u32_at(&self, view_index: isize) -> Option<u32> {
+    pub fn be_u32_at(&self, view_index: isize) -> Option<u32> {
         let data_index = self.data_index(view_index);
         self.data
             .get(data_index..(data_index + 4))
             .and_then(|slice| slice.try_into().ok())
-            .map(u32::from_le_bytes)
+            .map(u32::from_be_bytes)
     }
-
-    // pub fn be_u16_at(&self, view_index: isize) -> Option<u16> {
-    //     let data_index = self.data_index(view_index);
-    //     self.data
-    //         .get(data_index..(data_index + 2))
-    //         .and_then(|slice| slice.try_into().ok())
-    //         .map(u16::from_le_bytes)
-    // }
 
     pub fn rgb_at(&self, view_index: isize) -> Option<[u8; 3]> {
         let data_index = self.data_index(view_index);
@@ -160,7 +152,7 @@ fn view_access_u32() {
     assert_eq!(view.byte_at(0), Some(0x12));
     assert_eq!(view.byte_at(1), Some(0xaa));
 
-    assert_eq!(view.le_u32_at(0), Some(0x78563412));
-    assert_eq!(view.le_u32_at(1), Some(0xddccbbaa));
-    assert_eq!(view.le_u32_at(2), None);
+    assert_eq!(view.be_u32_at(0), Some(0x12345678));
+    assert_eq!(view.be_u32_at(1), Some(0xaabbccdd));
+    assert_eq!(view.be_u32_at(2), None);
 }

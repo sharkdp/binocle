@@ -5,7 +5,8 @@ use anyhow::Result;
 use crate::buffer::Buffer;
 use crate::settings::{PixelStyle, Settings, WIDTH};
 use crate::style::{
-    Category, ColorGradient, Colorful, Entropy, Grayscale, Style, ABGR, BGR, RGB, RGBA,
+    Category, ColorGradient, Colorful, Datatype, DatatypeStyle, Endianness, Entropy, Grayscale,
+    Style, ABGR, BGR, RGB, RGBA,
 };
 use crate::view::View;
 
@@ -103,6 +104,17 @@ impl Binocle {
             PixelStyle::RGB => Box::new(RGB {}),
             PixelStyle::BGR => Box::new(BGR {}),
             PixelStyle::Entropy => Box::new(Entropy::with_window_size(32)),
+            PixelStyle::U16BE => {
+                Box::new(DatatypeStyle::new(Datatype::Unsigned16(Endianness::Big)))
+            }
+            PixelStyle::F32BE => Box::new(DatatypeStyle::new(Datatype::Float32 {
+                endianness: Endianness::Big,
+                bounds: (0.0, 30.0),
+            })),
+            PixelStyle::F32LE => Box::new(DatatypeStyle::new(Datatype::Float32 {
+                endianness: Endianness::Little,
+                bounds: (0.0, 30.0),
+            })),
         };
         style.init(&view);
 

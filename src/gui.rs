@@ -141,6 +141,9 @@ impl Gui {
             ui.selectable_value(&mut settings.pixel_style, PixelStyle::ABGR, "ABGR");
             ui.selectable_value(&mut settings.pixel_style, PixelStyle::RGB, "RGB");
             ui.selectable_value(&mut settings.pixel_style, PixelStyle::BGR, "BGR");
+            ui.selectable_value(&mut settings.pixel_style, PixelStyle::U16BE, "U16");
+            ui.selectable_value(&mut settings.pixel_style, PixelStyle::F32BE, "F32 (BE)");
+            ui.selectable_value(&mut settings.pixel_style, PixelStyle::F32LE, "F32 (LE)");
             ui.separator();
             ui.checkbox(&mut settings.hex_view_visible, "hex view");
         });

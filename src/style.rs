@@ -1,6 +1,17 @@
+use std::convert::TryInto;
+
 use crate::view::View;
 
 pub type Color = [u8; 4];
+
+fn rgba_from_color(color: colorgrad::Color) -> Color {
+    [
+        (color.r * 255.0) as u8,
+        (color.g * 255.0) as u8,
+        (color.b * 255.0) as u8,
+        255,
+    ]
+}
 
 pub trait Style {
     fn init(&mut self, _view: &View) {}
@@ -62,13 +73,8 @@ impl ColorGradient {
     pub fn new(gradient: colorgrad::Gradient) -> Self {
         let mut byte_color = [[0, 0, 0, 0]; 256];
         for (byte, color) in byte_color.iter_mut().enumerate() {
-            let rgb = gradient.at((byte as f64) / 255.0f64);
-            *color = [
-                (rgb.r * 255.0) as u8,
-                (rgb.g * 255.0) as u8,
-                (rgb.b * 255.0) as u8,
-                255,
-            ];
+            let gradient_color = gradient.at((byte as f64) / 255.0f64);
+            *color = rgba_from_color(gradient_color);
         }
 
         ColorGradient { byte_color }
@@ -85,12 +91,94 @@ impl Style for ColorGradient {
     }
 }
 
+#[derive(Clone, Copy)]
+pub enum Endianness {
+    Big,
+    Little,
+}
+pub enum Datatype {
+    Unsigned16(Endianness),
+    Unsigned32(Endianness),
+    Float32 {
+        endianness: Endianness,
+        bounds: (f32, f32),
+    },
+}
+
+impl Datatype {}
+
+pub struct DatatypeStyle {
+    datatype: Datatype,
+    colors: Vec<Color>,
+}
+
+impl DatatypeStyle {
+    pub fn new(datatype: Datatype) -> Self {
+        let num_colors = 1024;
+        let mut colors = Vec::new();
+        colors.reserve(num_colors);
+
+        let gradient = colorgrad::magma();
+        for i in 0..num_colors {
+            colors.push(rgba_from_color(
+                gradient.at((i as f64) / (num_colors as f64)),
+            ));
+        }
+
+        DatatypeStyle { datatype, colors }
+    }
+
+    pub fn color_from_float(&self, t: f32) -> Color {
+        let num_colors = self.colors.len();
+        let index = (t * num_colors as f32) as isize;
+
+        index
+            .try_into()
+            .ok()
+            .and_then(|i: usize| self.colors.get(i))
+            .copied()
+            .unwrap_or([0, 0, 0, 0])
+    }
+}
+
+impl Style for DatatypeStyle {
+    fn color_at_index(&mut self, view: &View, view_index: isize) -> Color {
+        let maybe_t: Option<f32> = match self.datatype {
+            Datatype::Unsigned16(endianness) => view
+                .slice_at(view_index, 2)
+                .and_then(|slice| slice.try_into().ok().map(u16::from_le_bytes))
+                .map(|int| (int as f32) / (u16::MAX as f32)),
+            Datatype::Unsigned32(endianness) => view
+                .be_u32_at(view_index)
+                .map(|int| (int as f32) / (u32::MAX as f32)),
+            Datatype::Float32 {
+                endianness,
+                bounds: (min, max),
+            } => view
+                .slice_at(view_index, 4)
+                .and_then(|slice| {
+                    slice.try_into().ok().map(match endianness {
+                        Endianness::Little => f32::from_le_bytes,
+                        Endianness::Big => f32::from_be_bytes,
+                    })
+                })
+                .map(|t_unscaled| (t_unscaled - min) / (max - min)),
+        };
+
+        if let Some(t) = maybe_t {
+            self.color_from_float(t)
+        } else {
+            [0, 0, 0, 0]
+        }
+    }
+}
+
 pub struct RGBA;
 
 impl Style for RGBA {
     fn color_at_index(&mut self, view: &View, view_index: isize) -> Color {
-        if let Some(int) = view.le_u32_at(view_index) {
-            int.to_le_bytes()
+        if let Some(int) = view.be_u32_at(view_index) {
+            int.to_be_bytes()
         } else {
             [0, 0, 0, 0]
         }
@@ -101,8 +189,8 @@ pub struct ABGR;
 
 impl Style for ABGR {
     fn color_at_index(&mut self, view: &View, view_index: isize) -> Color {
-        if let Some(int) = view.le_u32_at(view_index) {
-            int.to_be_bytes()
+        if let Some(int) = view.be_u32_at(view_index) {
+            int.to_le_bytes()
         } else {
             [0, 0, 0, 0]
         }

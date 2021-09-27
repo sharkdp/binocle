@@ -15,6 +15,9 @@ pub enum PixelStyle {
     ABGR,
     RGB,
     BGR,
+    U16BE,
+    F32BE,
+    F32LE,
 }
 
 pub struct Settings {
