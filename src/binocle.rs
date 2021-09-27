@@ -25,7 +25,7 @@ impl Binocle {
             settings: Settings {
                 zoom: 0,
                 max_zoom: 6,
-                width: 804,
+                width: 512,
                 offset: 0,
                 offset_fine: 0,
                 stride: 1,
