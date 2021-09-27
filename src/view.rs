@@ -18,11 +18,11 @@ impl<'a> View<'a> {
         }
     }
 
-    pub fn len(&self) -> isize {
-        // the length of the view is (len - start)/stride, but rounded towards
-        // infinity. that's what the "+ stride - 1" part is for.
-        (self.data.len() as isize - self.start + self.stride - 1) / self.stride
-    }
+    // pub fn len(&self) -> isize {
+    //     // the length of the view is (len - start)/stride, but rounded towards
+    //     // infinity. that's what the "+ stride - 1" part is for.
+    //     (self.data.len() as isize - self.start + self.stride - 1) / self.stride
+    // }
 
     fn data_index(&self, view_index: isize) -> usize {
         (self.start + view_index * self.stride)
@@ -42,13 +42,13 @@ impl<'a> View<'a> {
             .map(u32::from_le_bytes)
     }
 
-    pub fn be_u16_at(&self, view_index: isize) -> Option<u16> {
-        let data_index = self.data_index(view_index);
-        self.data
-            .get(data_index..(data_index + 2))
-            .and_then(|slice| slice.try_into().ok())
-            .map(u16::from_le_bytes)
-    }
+    // pub fn be_u16_at(&self, view_index: isize) -> Option<u16> {
+    //     let data_index = self.data_index(view_index);
+    //     self.data
+    //         .get(data_index..(data_index + 2))
+    //         .and_then(|slice| slice.try_into().ok())
+    //         .map(u16::from_le_bytes)
+    // }
 
     pub fn rgb_at(&self, view_index: isize) -> Option<[u8; 3]> {
         let data_index = self.data_index(view_index);

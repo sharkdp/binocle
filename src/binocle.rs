@@ -4,7 +4,9 @@ use anyhow::Result;
 
 use crate::buffer::Buffer;
 use crate::settings::{PixelStyle, Settings, WIDTH};
-use crate::style::{Category, ColorGradient, Colorful, Entropy, Grayscale, Style};
+use crate::style::{
+    Category, ColorGradient, Colorful, Entropy, Grayscale, Style, ABGR, BGR, RGB, RGBA,
+};
 use crate::view::View;
 
 pub struct Binocle {
@@ -91,8 +93,14 @@ impl Binocle {
             PixelStyle::Grayscale => Box::new(Grayscale {}),
             PixelStyle::Category => Box::new(Category {}),
             PixelStyle::GradientMagma => Box::new(ColorGradient::new(colorgrad::magma())),
+            PixelStyle::GradientPlasma => Box::new(ColorGradient::new(colorgrad::plasma())),
+            PixelStyle::GradientViridis => Box::new(ColorGradient::new(colorgrad::viridis())),
+            PixelStyle::GradientRainbow => Box::new(ColorGradient::new(colorgrad::rainbow())),
+            PixelStyle::RGBA => Box::new(RGBA {}),
+            PixelStyle::ABGR => Box::new(ABGR {}),
+            PixelStyle::RGB => Box::new(RGB {}),
+            PixelStyle::BGR => Box::new(BGR {}),
             PixelStyle::Entropy => Box::new(Entropy::with_window_size(32)),
-            _ => unimplemented!("unknown style"),
         };
         style.init(&view);
 
