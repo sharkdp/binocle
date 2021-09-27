@@ -6,6 +6,7 @@ pub enum PixelStyle {
     Grayscale,
     Colorful,
     Category,
+    Entropy,
     GradientMagma,
     GradientPlasma,
     GradientViridis,

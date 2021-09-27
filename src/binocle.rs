@@ -166,6 +166,36 @@ impl Binocle {
                     [0, 0, 0, 0]
                 }
             }),
+            PixelStyle::Entropy => Box::new(|i| {
+                const ENTROPY_REGION_SIZE: usize = 64;
+
+                if let Some(bytes) = view.slice_at(i, ENTROPY_REGION_SIZE) {
+                    let mut counts: [i32; 256] = [0; 256];
+                    for byte in bytes.iter() {
+                        counts[*byte as usize] += 1;
+                    }
+
+                    let mut entropy = 0.0f64;
+                    for count in counts {
+                        if count > 0 {
+                            let p = (count as f64) / (ENTROPY_REGION_SIZE as f64);
+                            entropy -= p * p.log2();
+                        }
+                    }
+                    entropy *= 1.0f64 / 8.0f64;
+
+                    let color = colorgrad::magma().at(entropy);
+
+                    [
+                        (color.r * 255.0) as u8,
+                        (color.g * 255.0) as u8,
+                        (color.b * 255.0) as u8,
+                        255,
+                    ]
+                } else {
+                    [0, 0, 0, 0]
+                }
+            }),
             PixelStyle::RGBA => Box::new(|i| {
                 if let Some(int) = view.le_u32_at(i) {
                     int.to_le_bytes()
