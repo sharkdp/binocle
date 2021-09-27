@@ -4,66 +4,8 @@ use anyhow::Result;
 
 use crate::buffer::Buffer;
 use crate::settings::{PixelStyle, Settings, WIDTH};
+use crate::style::{Category, ColorGradient, Colorful, Entropy, Grayscale, Style};
 use crate::view::View;
-
-fn grayscale(b: u8) -> [u8; 4] {
-    [b, b, b, 255]
-}
-
-fn colorful(b: u8) -> [u8; 4] {
-    [b, b.overflowing_mul(2).0, b.overflowing_mul(4).0, 255]
-}
-
-fn category(b: u8) -> [u8; 4] {
-    if b == 0x00 {
-        [0, 0, 0, 255]
-    } else if b.is_ascii_graphic() {
-        [60, 255, 96, 255]
-    } else if b.is_ascii_whitespace() {
-        [240, 240, 240, 255]
-    } else if b.is_ascii() {
-        [60, 178, 255, 255]
-    } else {
-        [249, 53, 94, 255]
-    }
-}
-
-fn color_gradient(gradient: colorgrad::Gradient) -> Box<dyn Fn(u8) -> [u8; 4]> {
-    Box::new(move |b| {
-        let color = gradient.at((b as f64) / 255.0f64);
-        [
-            (color.r * 255.0) as u8,
-            (color.g * 255.0) as u8,
-            (color.b * 255.0) as u8,
-            255,
-        ]
-    })
-}
-
-fn u32_viridis(i: u32) -> [u8; 4] {
-    let color = colorgrad::viridis().at((i as f64) / (u32::MAX as f64));
-    [
-        (color.r * 255.0) as u8,
-        (color.g * 255.0) as u8,
-        (color.b * 255.0) as u8,
-        255,
-    ]
-}
-
-fn u16_viridis(i: u16) -> [u8; 4] {
-    let color = colorgrad::viridis().at((i as f64) / (u16::MAX as f64));
-    [
-        (color.r * 255.0) as u8,
-        (color.g * 255.0) as u8,
-        (color.b * 255.0) as u8,
-        255,
-    ]
-}
-
-fn u16_colorful(i: u16) -> [u8; 4] {
-    let bytes: [u8; 2] = i.to_le_bytes();
-    [bytes[0], bytes[1], 255, 255]
-}
 
 pub struct Binocle {
     pub settings: Settings,
@@ -144,92 +86,15 @@ impl Binocle {
             settings.stride,
         );
 
-        let color_at_index: Box<dyn Fn(isize) -> [u8; 4]> = match settings.pixel_style {
-            PixelStyle::Category => Box::new(|i| {
-                if let Some(byte) = view.byte_at(i) {
-                    category(byte)
-                } else {
-                    [0, 0, 0, 0]
-                }
-            }),
-            PixelStyle::Colorful => Box::new(|i| {
-                if let Some(byte) = view.byte_at(i) {
-                    colorful(byte)
-                } else {
-                    [0, 0, 0, 0]
-                }
-            }),
-            PixelStyle::Grayscale => Box::new(|i| {
-                if let Some(byte) = view.byte_at(i) {
-                    grayscale(byte)
-                } else {
-                    [0, 0, 0, 0]
-                }
-            }),
-            PixelStyle::Entropy => Box::new(|i| {
-                const ENTROPY_REGION_SIZE: usize = 64;
-
-                if let Some(bytes) = view.slice_at(i, ENTROPY_REGION_SIZE) {
-                    let mut counts: [i32; 256] = [0; 256];
-                    for byte in bytes.iter() {
-                        counts[*byte as usize] += 1;
-                    }
-
-                    let mut entropy = 0.0f64;
-                    for count in counts {
-                        if count > 0 {
-                            let p = (count as f64) / (ENTROPY_REGION_SIZE as f64);
-                            entropy -= p * p.log2();
-                        }
-                    }
-                    entropy *= 1.0f64 / 8.0f64;
-
-                    let color = colorgrad::magma().at(entropy);
-
-                    [
-                        (color.r * 255.0) as u8,
-                        (color.g * 255.0) as u8,
-                        (color.b * 255.0) as u8,
-                        255,
-                    ]
-                } else {
-                    [0, 0, 0, 0]
-                }
-            }),
-            PixelStyle::RGBA => Box::new(|i| {
-                if let Some(int) = view.le_u32_at(i) {
-                    int.to_le_bytes()
-                } else {
-                    [0, 0, 0, 0]
-                }
-            }),
-            PixelStyle::ABGR => Box::new(|i| {
-                if let Some(int) = view.le_u32_at(i) {
-                    int.to_be_bytes()
-                } else {
-                    [0, 0, 0, 0]
-                }
-            }),
-            PixelStyle::RGB => Box::new(|i| {
-                if let Some([r, g, b]) = view.rgb_at(i) {
-                    [r, g, b, 255]
-                } else {
-                    [0, 0, 0, 0]
-                }
-            }),
-            PixelStyle::BGR => Box::new(|i| {
-                if let Some([b, g, r]) = view.rgb_at(i) {
-                    [r, g, b, 255]
-                } else {
-                    [0, 0, 0, 0]
-                }
-            }),
-            // PixelStyle::GradientMagma => color_gradient(colorgrad::magma()),
-            // PixelStyle::GradientPlasma => color_gradient(colorgrad::plasma()),
-            // PixelStyle::GradientViridis => color_gradient(colorgrad::viridis()),
-            // PixelStyle::GradientRainbow => color_gradient(colorgrad::rainbow()),
-            _ => unimplemented!("Style not yet implemented"),
+        let mut style: Box<dyn Style> = match settings.pixel_style {
+            PixelStyle::Colorful => Box::new(Colorful {}),
+            PixelStyle::Grayscale => Box::new(Grayscale {}),
+            PixelStyle::Category => Box::new(Category {}),
+            PixelStyle::GradientMagma => Box::new(ColorGradient::new(colorgrad::magma())),
+            PixelStyle::Entropy => Box::new(Entropy::with_window_size(32)),
+            _ => unimplemented!("unknown style"),
         };
+        style.init(&view);
 
         for (i, pixel) in frame.chunks_exact_mut(4).enumerate() {
             let zoom_factor = 2isize.pow(settings.zoom as u32);
@@ -241,7 +106,7 @@ impl Binocle {
             } else {
                 let view_index = y * settings.width + x;
 
-                color_at_index(view_index)
+                style.color_at_index(&view, view_index)
             };
 
             pixel.copy_from_slice(&color);

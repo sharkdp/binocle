@@ -6,6 +6,7 @@ mod buffer;
 mod event_loop;
 mod gui;
 mod settings;
+mod style;
 mod view;
 
 fn main() -> anyhow::Result<()> {

@@ -114,11 +114,7 @@ impl Gui {
                 PixelStyle::Grayscale,
                 "Grayscale",
             );
-            ui.selectable_value(
-                &mut settings.pixel_style,
-                PixelStyle::Entropy,
-                "Entropy",
-            );
+            ui.selectable_value(&mut settings.pixel_style, PixelStyle::Entropy, "Entropy");
             ui.selectable_value(&mut settings.pixel_style, PixelStyle::Category, "Category");
             ui.selectable_value(
                 &mut settings.pixel_style,
