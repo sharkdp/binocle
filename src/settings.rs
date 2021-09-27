@@ -37,3 +37,13 @@ pub struct Settings {
     pub hex_view: String,
     pub hex_ascii: String,
 }
+
+impl Settings {
+    pub fn zoom_factor(&self) -> isize {
+        2isize.pow(self.zoom as u32)
+    }
+
+    pub fn offset_fine_max(&self) -> isize {
+        3 * self.width * self.stride
+    }
+}

@@ -105,7 +105,7 @@ impl Binocle {
         style.init(&view);
 
         for (i, pixel) in frame.chunks_exact_mut(4).enumerate() {
-            let zoom_factor = 2isize.pow(settings.zoom as u32);
+            let zoom_factor = settings.zoom_factor();
             let x = (((i as isize) % WIDTH as isize) as isize) / zoom_factor;
             let y = (((i as isize) / WIDTH as isize) as isize) / zoom_factor;
 

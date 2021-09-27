@@ -73,6 +73,7 @@ impl Gui {
 
     /// Create the UI using egui.
     fn ui(&mut self, ctx: &egui::CtxRef, settings: &mut Settings) {
+        let offset_fine_max = settings.offset_fine_max();
         egui::SidePanel::right("Settings").show(ctx, |ui| {
             ui.add(
                 egui::Slider::new(&mut settings.zoom, 0..=settings.max_zoom)
@@ -101,7 +102,7 @@ impl Gui {
                     .text("coarse ([shift +] up/down)"),
             );
             ui.add(
-                egui::Slider::new(&mut settings.offset_fine, 0..=settings.width)
+                egui::Slider::new(&mut settings.offset_fine, 0..=offset_fine_max)
                     .clamp_to_range(true)
                     .smart_aim(false)
                     .text("fine (m/n)"),
