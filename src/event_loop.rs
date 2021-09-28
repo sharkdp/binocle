@@ -261,13 +261,13 @@ pub fn run(filename: &OsStr) -> Result<()> {
                 settings.zoom = settings.zoom.min(settings.max_zoom);
 
                 settings.width = settings.width.max(1);
-                settings.width = settings.width.min(WIDTH as isize);
+                settings.width = settings.width.min(settings.max_width());
 
                 settings.offset = settings.offset.max(0);
                 settings.offset = settings.offset.min(settings.buffer_length);
 
                 settings.offset_fine = settings.offset_fine.max(0);
-                settings.offset_fine = settings.offset_fine.min(settings.offset_fine_max());
+                settings.offset_fine = settings.offset_fine.min(settings.max_offset_fine());
 
                 settings.stride = settings.stride.max(1);
                 settings.stride = settings.stride.min(settings.max_stride);

@@ -56,7 +56,11 @@ impl Settings {
         2isize.pow(self.zoom as u32)
     }
 
-    pub fn offset_fine_max(&self) -> isize {
+    pub fn max_offset_fine(&self) -> isize {
         3 * self.width * self.stride
+    }
+
+    pub fn max_width(&self) -> isize {
+        2 * (WIDTH as isize)
     }
 }
