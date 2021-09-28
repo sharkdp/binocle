@@ -2,16 +2,16 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="238.08429mm"
-   height="124.54945mm"
-   viewBox="0 0 238.08429 124.54944"
+   width="224.08429mm"
+   height="110.54945mm"
+   viewBox="0 0 224.08429 110.54941"
    version="1.1"
    id="svg5"
    inkscape:version="1.1 (1:1.1+202105261517+ce6663b3b7)"
    sodipodi:docname="logo.svg"
    inkscape:export-filename="/home/ped1st/software/binocle/assets/logo.png"
-   inkscape:export-xdpi="64.010002"
-   inkscape:export-ydpi="64.010002"
+   inkscape:export-xdpi="56.68"
+   inkscape:export-ydpi="56.68"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -26,19 +26,19 @@
      inkscape:pagecheckerboard="0"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="1.0998546"
-     inkscape:cx="446.42264"
-     inkscape:cy="377.3226"
+     inkscape:zoom="1.1335271"
+     inkscape:cx="423.457"
+     inkscape:cy="351.11643"
      inkscape:window-width="1920"
      inkscape:window-height="1177"
      inkscape:window-x="1920"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
      inkscape:current-layer="layer1"
-     fit-margin-top="10"
-     fit-margin-left="10"
-     fit-margin-right="10"
-     fit-margin-bottom="10"
+     fit-margin-top="3"
+     fit-margin-left="3"
+     fit-margin-right="3"
+     fit-margin-bottom="3"
      lock-margins="true" />
   <defs
      id="defs2">
@@ -69,7 +69,7 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(0.20928676,-61.841305)">
+     transform="translate(-6.7907132,-68.841305)">
     <g
        aria-label="binocle"
        id="text3520"
