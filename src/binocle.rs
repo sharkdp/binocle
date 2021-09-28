@@ -44,7 +44,7 @@ impl Binocle {
         })
     }
 
-    pub fn update(&mut self) {
+    pub fn update_hex_view(&mut self) {
         if !self.settings.hex_view_visible {
             return;
         }

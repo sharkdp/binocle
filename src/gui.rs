@@ -80,19 +80,27 @@ impl Gui {
                 egui::Slider::new(&mut settings.zoom, 0..=settings.max_zoom)
                     .clamp_to_range(true)
                     .smart_aim(false)
-                    .text("zoom (+/-)"),
+                    .text("zoom"),
             );
             ui.add(
                 egui::Slider::new(&mut settings.width, 1..=max_width)
                     .clamp_to_range(true)
                     .smart_aim(false)
-                    .text("width (left/right)"),
+                    .text("width"),
             );
+            ui.horizontal(|ui| {
+                if ui.button("÷ 2").clicked() && settings.width >= 2 {
+                    settings.width = settings.width / 2;
+                }
+                if ui.button("× 2").clicked() && 2 * settings.width <= max_width {
+                    settings.width *= 2;
+                }
+            });
             ui.add(
                 egui::Slider::new(&mut settings.stride, 1..=settings.max_stride)
                     .clamp_to_range(true)
                     .smart_aim(false)
-                    .text("stride (,/.)"),
+                    .text("stride"),
             );
             ui.separator();
             ui.label("Offset");
@@ -100,13 +108,13 @@ impl Gui {
                 egui::Slider::new(&mut settings.offset, 0..=settings.buffer_length)
                     .clamp_to_range(true)
                     .smart_aim(false)
-                    .text("coarse ([shift +] up/down)"),
+                    .text("coarse"),
             );
             ui.add(
                 egui::Slider::new(&mut settings.offset_fine, 0..=max_offset_fine)
                     .clamp_to_range(true)
                     .smart_aim(false)
-                    .text("fine (m/n)"),
+                    .text("fine"),
             );
             ui.separator();
             ui.label("Pixel style");

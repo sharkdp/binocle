@@ -1,4 +1,5 @@
 use std::ffi::OsStr;
+use std::path::Path;
 
 use anyhow::Result;
 use log::error;
@@ -36,7 +37,14 @@ pub fn run(filename: &OsStr) -> Result<()> {
     let window = {
         let size = LogicalSize::new(WIDTH as f64, HEIGHT as f64);
         WindowBuilder::new()
-            .with_title("binocle")
+            .with_title(&format!(
+                "binocle - {}",
+                Path::new(filename)
+                    .file_name()
+                    .map(|f| f.to_string_lossy())
+                    .as_deref()
+                    .unwrap_or("<unknown>")
+            ))
             .with_inner_size(size)
             .with_min_inner_size(size)
             .build(&event_loop)
@@ -118,9 +126,13 @@ pub fn run(filename: &OsStr) -> Result<()> {
                     settings.hex_view_visible = !settings.hex_view_visible;
                 }
 
-                if input.key_pressed(VirtualKeyCode::Plus) {
+                if input.key_pressed(VirtualKeyCode::Plus)
+                    || input.key_pressed(VirtualKeyCode::NumpadAdd)
+                {
                     settings.zoom += 1;
-                } else if input.key_pressed(VirtualKeyCode::Minus) {
+                } else if input.key_pressed(VirtualKeyCode::Minus)
+                    || input.key_pressed(VirtualKeyCode::NumpadSubtract)
+                {
                     settings.zoom -= 1;
                 }
 
@@ -284,8 +296,7 @@ pub fn run(filename: &OsStr) -> Result<()> {
                 }
             }
 
-            // Update internal state and request a redraw
-            binocle.update();
+            binocle.update_hex_view();
             window.request_redraw();
         }
     });
