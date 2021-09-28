@@ -156,6 +156,26 @@ pub fn run(filename: &OsStr) -> Result<()> {
                     settings.offset += settings.width * settings.stride * (HEIGHT as isize);
                 }
 
+                if input.key_pressed(VirtualKeyCode::Key1) {
+                    settings.stride = 1;
+                } else if input.key_pressed(VirtualKeyCode::Key2) {
+                    settings.stride = 2;
+                } else if input.key_pressed(VirtualKeyCode::Key3) {
+                    settings.stride = 3;
+                } else if input.key_pressed(VirtualKeyCode::Key4) {
+                    settings.stride = 4;
+                } else if input.key_pressed(VirtualKeyCode::Key5) {
+                    settings.stride = 5;
+                } else if input.key_pressed(VirtualKeyCode::Key6) {
+                    settings.stride = 6;
+                } else if input.key_pressed(VirtualKeyCode::Key7) {
+                    settings.stride = 7;
+                } else if input.key_pressed(VirtualKeyCode::Key8) {
+                    settings.stride = 8;
+                } else if input.key_pressed(VirtualKeyCode::Key9) {
+                    settings.stride = 9;
+                }
+
                 if input.key_pressed(VirtualKeyCode::Home) {
                     settings.offset = 0;
                     settings.offset_fine = 0;

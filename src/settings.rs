@@ -16,6 +16,11 @@ pub enum PixelStyle {
     RGB,
     BGR,
     U16BE,
+    U16LE,
+    U32BE,
+    U32LE,
+    I32BE,
+    I32LE,
     F32BE,
     F32LE,
 }
@@ -35,6 +40,8 @@ pub struct Settings {
 
     pub buffer_length: isize,
     pub canvas_width: isize,
+
+    pub value_range: (f32, f32),
 
     pub hex_view_visible: bool,
     pub hex_view: String,

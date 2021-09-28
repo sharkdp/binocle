@@ -99,10 +99,8 @@ pub enum Endianness {
 pub enum Datatype {
     Unsigned16(Endianness),
     Unsigned32(Endianness),
-    Float32 {
-        endianness: Endianness,
-        bounds: (f32, f32),
-    },
+    Signed32(Endianness),
+    Float32(Endianness),
 }
 
 impl Datatype {}
@@ -110,10 +108,11 @@ impl Datatype {}
 pub struct DatatypeStyle {
     datatype: Datatype,
     colors: Vec<Color>,
+    range: (f32, f32),
 }
 
 impl DatatypeStyle {
-    pub fn new(datatype: Datatype) -> Self {
+    pub fn new(datatype: Datatype, range: (f32, f32)) -> Self {
         let num_colors = 1024;
         let mut colors = Vec::new();
         colors.reserve(num_colors);
@@ -125,7 +124,11 @@ impl DatatypeStyle {
             ));
         }
 
-        DatatypeStyle { datatype, colors }
+        DatatypeStyle {
+            datatype,
+            colors,
+            range,
+        }
     }
 
     pub fn color_from_float(&self, t: f32) -> Color {
@@ -146,27 +149,42 @@ impl Style for DatatypeStyle {
         let maybe_t: Option<f32> = match self.datatype {
             Datatype::Unsigned16(endianness) => view
                 .slice_at(view_index, 2)
-                .and_then(|slice| slice.try_into().ok().map(u16::from_le_bytes))
-                .map(|int| (int as f32) / (u16::MAX as f32)),
+                .and_then(|slice| {
+                    slice.try_into().ok().map(match endianness {
+                        Endianness::Little => u16::from_le_bytes,
+                        Endianness::Big => u16::from_be_bytes,
+                    })
+                })
+                .map(|uint| uint as f32),
             Datatype::Unsigned32(endianness) => view
-                .be_u32_at(view_index)
-                .map(|int| (int as f32) / (u32::MAX as f32)),
-            Datatype::Float32 {
-                endianness,
-                bounds: (min, max),
-            } => view
                 .slice_at(view_index, 4)
                 .and_then(|slice| {
                     slice.try_into().ok().map(match endianness {
-                        Endianness::Little => f32::from_le_bytes,
-                        Endianness::Big => f32::from_be_bytes,
+                        Endianness::Little => u32::from_le_bytes,
+                        Endianness::Big => u32::from_be_bytes,
                     })
                 })
-                .map(|t_unscaled| (t_unscaled - min) / (max - min)),
+                .map(|uint| uint as f32),
+            Datatype::Signed32(endianness) => view
+                .slice_at(view_index, 4)
+                .and_then(|slice| {
+                    slice.try_into().ok().map(match endianness {
+                        Endianness::Little => i32::from_le_bytes,
+                        Endianness::Big => i32::from_be_bytes,
+                    })
+                })
+                .map(|int| int as f32),
+            Datatype::Float32(endianness) => view.slice_at(view_index, 4).and_then(|slice| {
+                slice.try_into().ok().map(match endianness {
+                    Endianness::Little => f32::from_le_bytes,
+                    Endianness::Big => f32::from_be_bytes,
+                })
+            }),
         };
 
         if let Some(t) = maybe_t {
-            self.color_from_float(t)
+            let (min, max) = self.range;
+            self.color_from_float((t - min) / (max - min))
         } else {
             [0, 0, 0, 0]
         }

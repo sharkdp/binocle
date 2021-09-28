@@ -141,9 +141,17 @@ impl Gui {
             ui.selectable_value(&mut settings.pixel_style, PixelStyle::ABGR, "ABGR");
             ui.selectable_value(&mut settings.pixel_style, PixelStyle::RGB, "RGB");
             ui.selectable_value(&mut settings.pixel_style, PixelStyle::BGR, "BGR");
-            ui.selectable_value(&mut settings.pixel_style, PixelStyle::U16BE, "U16");
+            ui.selectable_value(&mut settings.pixel_style, PixelStyle::U16BE, "U16 (BE)");
+            ui.selectable_value(&mut settings.pixel_style, PixelStyle::U16LE, "U16 (LE)");
+            ui.selectable_value(&mut settings.pixel_style, PixelStyle::U32BE, "U32 (BE)");
+            ui.selectable_value(&mut settings.pixel_style, PixelStyle::U32LE, "U32 (LE)");
+            ui.selectable_value(&mut settings.pixel_style, PixelStyle::I32BE, "I32 (BE)");
+            ui.selectable_value(&mut settings.pixel_style, PixelStyle::I32LE, "I32 (LE)");
             ui.selectable_value(&mut settings.pixel_style, PixelStyle::F32BE, "F32 (BE)");
             ui.selectable_value(&mut settings.pixel_style, PixelStyle::F32LE, "F32 (LE)");
+            ui.separator();
+            ui.add(egui::DragValue::new(&mut settings.value_range.0));
+            ui.add(egui::DragValue::new(&mut settings.value_range.1));
             ui.separator();
             ui.checkbox(&mut settings.hex_view_visible, "hex view");
         });
