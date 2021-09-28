@@ -111,6 +111,7 @@ dependencies = [
  "egui_wgpu_backend",
  "egui_winit_platform",
  "env_logger",
+ "humansize",
  "log",
  "pixels",
  "winit",
@@ -701,6 +702,12 @@ checksum = "62b467343b94ba476dcb2500d242dadbb39557df889310ac77c5d99100aaac33"
 dependencies = [
  "libc",
 ]
+
+[[package]]
+name = "humansize"
+version = "1.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "02296996cb8796d7c6e3bc2d9211b7802812d36999a51bb754123ead7d37d026"
 
 [[package]]
 name = "humantime"

@@ -1,11 +1,13 @@
+use std::time::Instant;
+
 use egui::{ClippedMesh, FontDefinitions};
 use egui_wgpu_backend::{BackendError, RenderPass, ScreenDescriptor};
 use egui_winit_platform::{Platform, PlatformDescriptor};
+use humansize::{file_size_opts, FileSize};
 use pixels::{wgpu, PixelsContext};
-use std::time::Instant;
 use winit::window::Window;
 
-use crate::settings::{PixelStyle, Settings};
+use crate::settings::{PixelStyle, Settings, HEIGHT};
 
 pub struct Gui {
     // State for egui.
@@ -166,6 +168,17 @@ impl Gui {
             ui.add(egui::DragValue::new(&mut settings.value_range.1));
             ui.separator();
             ui.checkbox(&mut settings.hex_view_visible, "hex view");
+            ui.separator();
+            let file_size = settings
+                .buffer_length
+                .file_size(file_size_opts::BINARY)
+                .unwrap();
+            ui.label(format!("file size: {}", file_size));
+            let zoom_factor = settings.zoom_factor();
+            let grid_size = (settings.width * (HEIGHT as isize) * settings.stride / zoom_factor)
+                .file_size(file_size_opts::BINARY)
+                .unwrap();
+            ui.label(format!("grid size: {}", grid_size));
         });
 
         if settings.hex_view_visible {

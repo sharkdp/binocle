@@ -127,7 +127,7 @@ impl Binocle {
             let x = (((i as isize) % WIDTH as isize) as isize) / zoom_factor;
             let y = (((i as isize) / WIDTH as isize) as isize) / zoom_factor;
 
-            let color = if x > settings.width {
+            let color = if x >= settings.width {
                 [0, 0, 0, 0]
             } else {
                 let view_index = y * settings.width + x;
