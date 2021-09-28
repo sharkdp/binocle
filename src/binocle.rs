@@ -40,11 +40,14 @@ impl Binocle {
             1,
         );
 
-        for i in 0..(32 * 24) {
-            if i > 0 && i % 32 == 0 {
+        let width = (self.settings.width * self.settings.stride).min(36);
+        let height = 24;
+
+        for i in 0..(width * height) {
+            if i > 0 && i % width == 0 {
                 hex_view.push('\n');
                 hex_ascii.push('\n');
-            } else if i > 0 && i % 8 == 0 {
+            } else if i > 0 && (i % width) % 8 == 0 {
                 hex_view.push(' ');
             }
 

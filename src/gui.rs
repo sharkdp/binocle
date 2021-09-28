@@ -189,7 +189,7 @@ impl Gui {
                             .text_style(egui::TextStyle::Monospace)
                             .enabled(false)
                             .frame(false)
-                            .desired_width(720.0),
+                            .desired_width(840.0),
                     );
                     ui.add(
                         egui::TextEdit::multiline(&mut settings.hex_ascii)
