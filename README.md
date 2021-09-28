@@ -12,9 +12,10 @@ This allows users to identify interesting parts in large files and to reveal ima
 
 ## How it works
 
-*binocle* allows you to control various parameters like the offset into the file, the stride, the width of the rectangular grid.
+The program allows you to control various parameters like the *offset* into the file, the *stride*,
+the *width* of the rectangular grid as well as the way in which (groups of) bytes are colorized.
 
-![](assets/binary-view.png)
+<p align="center"><img src="assets/binary-view.png" /></p>
 
 ## Related work
 
