@@ -269,8 +269,8 @@ pub fn run(filename: &OsStr) -> Result<()> {
                     }
                 }
 
-                settings.zoom = settings.zoom.max(0);
-                settings.zoom = settings.zoom.min(settings.max_zoom);
+                settings.zoom = settings.zoom.max(settings.zoom_range.0);
+                settings.zoom = settings.zoom.min(settings.zoom_range.1);
 
                 settings.width = settings.width.max(1);
                 settings.width = settings.width.min(settings.max_width());

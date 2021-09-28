@@ -77,10 +77,13 @@ impl Gui {
         let max_width = settings.max_width();
         egui::SidePanel::right("Settings").show(ctx, |ui| {
             ui.add(
-                egui::Slider::new(&mut settings.zoom, 0..=settings.max_zoom)
-                    .clamp_to_range(true)
-                    .smart_aim(false)
-                    .text("zoom"),
+                egui::Slider::new(
+                    &mut settings.zoom,
+                    settings.zoom_range.0..=settings.zoom_range.1,
+                )
+                .clamp_to_range(true)
+                .smart_aim(false)
+                .text("zoom"),
             );
             ui.add(
                 egui::Slider::new(&mut settings.width, 1..=max_width)

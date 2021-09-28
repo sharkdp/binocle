@@ -27,7 +27,7 @@ pub enum PixelStyle {
 
 pub struct Settings {
     pub zoom: isize,
-    pub max_zoom: isize,
+    pub zoom_range: (isize, isize),
 
     pub width: isize,
     pub offset: isize,
@@ -53,7 +53,7 @@ pub struct Settings {
 
 impl Settings {
     pub fn zoom_factor(&self) -> isize {
-        2isize.pow(self.zoom as u32)
+        2isize.pow((self.zoom - 1) as u32)
     }
 
     pub fn max_offset_fine(&self) -> isize {
@@ -62,5 +62,28 @@ impl Settings {
 
     pub fn max_width(&self) -> isize {
         2 * (WIDTH as isize)
+    }
+}
+
+impl Default for Settings {
+    fn default() -> Self {
+        Self {
+            zoom: 1,
+            zoom_range: (1, 7),
+            width: 512,
+            offset: 0,
+            offset_fine: 0,
+            stride: 1,
+            max_stride: 128,
+            pixel_style: PixelStyle::Colorful,
+            buffer_length: 0,
+            canvas_width: WIDTH as isize,
+            value_range: (0.0, 100.0),
+            hex_view_visible: false,
+            hex_view: "".into(),
+            hex_ascii: "".into(),
+            gui_wants_keyboard: false,
+            gui_wants_mouse: false,
+        }
     }
 }

@@ -20,28 +20,10 @@ impl Binocle {
         let buffer = Buffer::from_file(path)?;
 
         let buffer_length = buffer.len();
+        let mut settings = Settings::default();
+        settings.buffer_length = buffer_length as isize;
 
-        Ok(Self {
-            buffer,
-            settings: Settings {
-                zoom: 0,
-                max_zoom: 6,
-                width: 512,
-                offset: 0,
-                offset_fine: 0,
-                stride: 1,
-                max_stride: 128,
-                pixel_style: PixelStyle::Colorful,
-                buffer_length: buffer_length as isize,
-                canvas_width: WIDTH as isize,
-                value_range: (0.0, 100.0),
-                hex_view_visible: false,
-                hex_view: "".into(),
-                hex_ascii: "".into(),
-                gui_wants_keyboard: false,
-                gui_wants_mouse: false,
-            },
-        })
+        Ok(Self { buffer, settings })
     }
 
     pub fn update_hex_view(&mut self) {
