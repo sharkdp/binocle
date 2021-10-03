@@ -176,9 +176,6 @@ jobs:
         # Binary
         cp "${{ steps.strip.outputs.BIN_PATH }}" "$ARCHIVE_DIR"
 
-        # Man page
-        cp 'doc/${{ env.PROJECT_NAME }}.1' "$ARCHIVE_DIR"
-
         # README, LICENSE and CHANGELOG files
         cp "README.md" "LICENSE-MIT" "LICENSE-APACHE" "CHANGELOG.md" "$ARCHIVE_DIR"
 
@@ -222,10 +219,6 @@ jobs:
 
         # Binary
         install -Dm755 "${{ steps.strip.outputs.BIN_PATH }}" "${DPKG_DIR}/usr/bin/${{ steps.strip.outputs.BIN_NAME }}"
-
-        # Man page
-        install -Dm644 'doc/${{ env.PROJECT_NAME }}.1' "${DPKG_DIR}/usr/share/man/man1/${{ env.PROJECT_NAME }}.1"
-        gzip -n --best "${DPKG_DIR}/usr/share/man/man1/${{ env.PROJECT_NAME }}.1"
 
         # README and LICENSE
         install -Dm644 "README.md" "${DPKG_DIR}/usr/share/doc/${DPKG_BASENAME}/README.md"
