@@ -7,7 +7,10 @@ use humansize::{file_size_opts, FileSize};
 use pixels::{wgpu, PixelsContext};
 use winit::window::Window;
 
-use crate::settings::{PixelStyle, Settings, HEIGHT};
+use crate::{
+    datatype::{Endianness, Signedness},
+    settings::{GuiDatatype, PixelStyle, Settings, HEIGHT},
+};
 
 pub struct Gui {
     // State for egui.
@@ -132,9 +135,9 @@ impl Gui {
             ui.separator();
 
             ui.add(egui::Label::new("Pixel style").heading());
-            ui.label("Single-byte");
             ui.selectable_value(&mut settings.pixel_style, PixelStyle::Colorful, "Default");
             ui.selectable_value(&mut settings.pixel_style, PixelStyle::Category, "Category");
+            ui.selectable_value(&mut settings.pixel_style, PixelStyle::Datatype, "Datatype");
             ui.horizontal_wrapped(|ui| {
                 ui.selectable_value(
                     &mut settings.pixel_style,
@@ -186,20 +189,65 @@ impl Gui {
             ui.selectable_value(&mut settings.pixel_style, PixelStyle::BGR, "BGR");
             ui.separator();
             ui.label("Multi-byte (data types)");
-            ui.selectable_value(&mut settings.pixel_style, PixelStyle::U16BE, "U16 (BE)");
-            ui.selectable_value(&mut settings.pixel_style, PixelStyle::U16LE, "U16 (LE)");
-            ui.selectable_value(&mut settings.pixel_style, PixelStyle::U32BE, "U32 (BE)");
-            ui.selectable_value(&mut settings.pixel_style, PixelStyle::U32LE, "U32 (LE)");
-            ui.selectable_value(&mut settings.pixel_style, PixelStyle::I32BE, "I32 (BE)");
-            ui.selectable_value(&mut settings.pixel_style, PixelStyle::I32LE, "I32 (LE)");
-            ui.selectable_value(&mut settings.pixel_style, PixelStyle::F32BE, "F32 (BE)");
-            ui.selectable_value(&mut settings.pixel_style, PixelStyle::F32LE, "F32 (LE)");
-            ui.horizontal(|ui| {
-                ui.label("min:");
-                ui.add(egui::DragValue::new(&mut settings.value_range.0).speed(10.0));
-                ui.label("max:");
-                ui.add(egui::DragValue::new(&mut settings.value_range.1).speed(10.0));
+            ui.vertical(|ui| {
+                ui.set_enabled(settings.pixel_style == PixelStyle::Datatype);
+
+                ui.horizontal_wrapped(|ui| {
+                    ui.selectable_value(
+                        &mut settings.datatype_settings.datatype,
+                        GuiDatatype::Integer16,
+                        "Integer (16 bit)",
+                    );
+                    ui.selectable_value(
+                        &mut settings.datatype_settings.datatype,
+                        GuiDatatype::Integer32,
+                        "Integer (32 bit)",
+                    );
+                    ui.selectable_value(
+                        &mut settings.datatype_settings.datatype,
+                        GuiDatatype::Float32,
+                        "Float (32 bit)",
+                    );
+                });
+
+                ui.horizontal(|ui| {
+                    ui.selectable_value(
+                        &mut settings.datatype_settings.signedness,
+                        Signedness::Unsigned,
+                        "Unsigned",
+                    );
+                    ui.selectable_value(
+                        &mut settings.datatype_settings.signedness,
+                        Signedness::Signed,
+                        "Signed",
+                    );
+                });
+
+                ui.horizontal(|ui| {
+                    ui.set_enabled(match settings.datatype_settings.datatype {
+                        GuiDatatype::Integer16 | GuiDatatype::Integer32 => true,
+                        GuiDatatype::Float32 => false,
+                    });
+                    ui.selectable_value(
+                        &mut settings.datatype_settings.endianness,
+                        Endianness::Little,
+                        "Little Endian",
+                    );
+                    ui.selectable_value(
+                        &mut settings.datatype_settings.endianness,
+                        Endianness::Big,
+                        "Big Endian",
+                    );
+                });
+
+                ui.horizontal(|ui| {
+                    ui.label("min:");
+                    ui.add(egui::DragValue::new(&mut settings.value_range.0).speed(10.0));
+                    ui.label("max:");
+                    ui.add(egui::DragValue::new(&mut settings.value_range.1).speed(10.0));
+                });
             });
+
             ui.separator();
 
             ui.checkbox(&mut settings.hex_view_visible, "hex view");
@@ -222,12 +270,12 @@ impl Gui {
                     ui.add(
                         egui::Label::new(&mut settings.hex_view)
                             .monospace()
-                            .wrap(false)
+                            .wrap(false),
                     );
                     ui.add(
                         egui::Label::new(&mut settings.hex_ascii)
-                        .monospace()
-                            .wrap(false)
+                            .monospace()
+                            .wrap(false),
                     );
                 });
             });

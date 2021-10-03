@@ -1,3 +1,5 @@
+use crate::datatype::{Endianness, Signedness};
+
 pub const WIDTH: u32 = 1366;
 pub const HEIGHT: u32 = 1024;
 
@@ -17,14 +19,20 @@ pub enum PixelStyle {
     ABGR,
     RGB,
     BGR,
-    U16BE,
-    U16LE,
-    U32BE,
-    U32LE,
-    I32BE,
-    I32LE,
-    F32BE,
-    F32LE,
+    Datatype,
+}
+
+#[derive(Clone,PartialEq)]
+pub enum GuiDatatype {
+    Integer16,
+    Integer32,
+    Float32,
+}
+
+pub struct DatatypeSettings {
+    pub datatype: GuiDatatype,
+    pub signedness: Signedness,
+    pub endianness: Endianness,
 }
 
 pub struct Settings {
@@ -39,6 +47,7 @@ pub struct Settings {
     pub max_stride: isize,
 
     pub pixel_style: PixelStyle,
+    pub datatype_settings: DatatypeSettings,
 
     pub buffer_length: isize,
     pub canvas_width: isize,
@@ -78,6 +87,11 @@ impl Default for Settings {
             stride: 1,
             max_stride: 128,
             pixel_style: PixelStyle::Colorful,
+            datatype_settings: DatatypeSettings {
+                datatype: GuiDatatype::Integer16,
+                signedness: Signedness::Unsigned,
+                endianness: Endianness::Little,
+            },
             buffer_length: 0,
             canvas_width: WIDTH as isize,
             value_range: (0.0, 100.0),
