@@ -107,7 +107,7 @@ impl DatatypeStyle {
         let mut colors = Vec::new();
         colors.reserve(num_colors);
 
-        let gradient = colorgrad::magma();
+        let gradient = colorgrad::plasma();
         for i in 0..num_colors {
             colors.push(rgba_from_color(
                 gradient.at((i as f64) / (num_colors as f64)),
@@ -124,7 +124,7 @@ impl DatatypeStyle {
 
     pub fn color_from_float(&self, t: f32) -> Color {
         let num_colors = self.colors.len();
-        let index = (t * num_colors as f32) as isize;
+        let index = ((t - f32::EPSILON) * num_colors as f32) as isize;
 
         index
             .try_into()
