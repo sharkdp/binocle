@@ -50,7 +50,8 @@ fn main() -> std::io::Result<()> {
     }
     {
         writer.section("u32 BE")?;
-        let numbers = (0u32..=100u32)
+        let numbers = (0u32..=100_000u32)
+            .step_by(1000)
             .flat_map(|i| i.to_be_bytes())
             .collect::<Vec<_>>();
         writer.add(&numbers)?;
