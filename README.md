@@ -21,7 +21,7 @@ This allows users to identify interesting parts in large files and to reveal ima
 
 [**Watch a short screencast here**](https://shark.fish/binocle.mp4)
 
-![](assets/screenshot.png)
+<a href="https://raw.githubusercontent.com/sharkdp/binocle/master/assets/screenshot.png"><img src="assets/screenshot.png"></a>
 
 ## How it works
 
