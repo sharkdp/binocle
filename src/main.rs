@@ -3,12 +3,12 @@ use std::process;
 
 mod binocle;
 mod buffer;
+mod datatype;
 mod event_loop;
 mod gui;
 mod settings;
 mod style;
 mod view;
-mod datatype;
 
 fn main() -> anyhow::Result<()> {
     let mut args = env::args_os();

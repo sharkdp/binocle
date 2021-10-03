@@ -22,7 +22,7 @@ pub enum PixelStyle {
     Datatype,
 }
 
-#[derive(Clone,PartialEq)]
+#[derive(Clone, PartialEq)]
 pub enum GuiDatatype {
     Integer8,
     Integer16,

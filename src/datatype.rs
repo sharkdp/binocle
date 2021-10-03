@@ -79,7 +79,7 @@ impl Datatype {
                 .try_into()
                 .ok()
                 .map(|bytes| i32::from_be_bytes(bytes) as f32),
-            
+
             (Datatype::Integer64(Signedness::Unsigned), Endianness::Little) => slice
                 .try_into()
                 .ok()

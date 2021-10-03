@@ -35,17 +35,24 @@ fn main() -> std::io::Result<()> {
     }
     {
         writer.section("i8")?;
-        let numbers = (i8::MIN..=i8::MAX).flat_map(|i| i.to_le_bytes()).collect::<Vec<_>>();
+        let numbers = (i8::MIN..=i8::MAX)
+            .flat_map(|i| i.to_le_bytes())
+            .collect::<Vec<_>>();
         writer.add(&numbers)?;
     }
     {
         writer.section("u16 LE")?;
-        let numbers = (u16::MIN..=u16::MAX).step_by(64).flat_map(|i| i.to_le_bytes()).collect::<Vec<_>>();
+        let numbers = (u16::MIN..=u16::MAX)
+            .step_by(64)
+            .flat_map(|i| i.to_le_bytes())
+            .collect::<Vec<_>>();
         writer.add(&numbers)?;
     }
     {
         writer.section("u32 BE")?;
-        let numbers = (0u32..=100u32).flat_map(|i| i.to_be_bytes()).collect::<Vec<_>>();
+        let numbers = (0u32..=100u32)
+            .flat_map(|i| i.to_be_bytes())
+            .collect::<Vec<_>>();
         writer.add(&numbers)?;
     }
     Ok(())
