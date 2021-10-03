@@ -85,6 +85,10 @@ impl Binocle {
             PixelStyle::GradientPlasma => Box::new(ColorGradient::new(colorgrad::plasma())),
             PixelStyle::GradientViridis => Box::new(ColorGradient::new(colorgrad::viridis())),
             PixelStyle::GradientRainbow => Box::new(ColorGradient::new(colorgrad::rainbow())),
+            PixelStyle::GradientTurbo => Box::new(ColorGradient::new(colorgrad::turbo())),
+            PixelStyle::GradientCubehelix => {
+                Box::new(ColorGradient::new(colorgrad::cubehelix_default()))
+            }
             PixelStyle::RGBA => Box::new(RGBA {}),
             PixelStyle::ABGR => Box::new(ABGR {}),
             PixelStyle::RGB => Box::new(RGB {}),

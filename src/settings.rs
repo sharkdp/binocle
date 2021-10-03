@@ -11,6 +11,8 @@ pub enum PixelStyle {
     GradientPlasma,
     GradientViridis,
     GradientRainbow,
+    GradientTurbo,
+    GradientCubehelix,
     RGBA,
     ABGR,
     RGB,

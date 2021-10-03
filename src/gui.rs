@@ -78,6 +78,7 @@ impl Gui {
         let max_offset_fine = settings.max_offset_fine();
         let max_width = settings.max_width();
         egui::SidePanel::right("Settings").show(ctx, |ui| {
+            ui.add(egui::Label::new("Layout").heading());
             ui.add(
                 egui::Slider::new(
                     &mut settings.zoom,
@@ -114,7 +115,8 @@ impl Gui {
                     .text("stride"),
             );
             ui.separator();
-            ui.label("Offset");
+
+            ui.add(egui::Label::new("Offset").heading());
             ui.add(
                 egui::Slider::new(&mut settings.offset, 0..=settings.buffer_length)
                     .clamp_to_range(true)
@@ -128,39 +130,62 @@ impl Gui {
                     .text("fine"),
             );
             ui.separator();
-            ui.label("Pixel style");
-            ui.selectable_value(&mut settings.pixel_style, PixelStyle::Colorful, "Colorful");
-            ui.selectable_value(
-                &mut settings.pixel_style,
-                PixelStyle::Grayscale,
-                "Grayscale",
-            );
-            ui.selectable_value(&mut settings.pixel_style, PixelStyle::Entropy, "Entropy");
+
+            ui.add(egui::Label::new("Pixel style").heading());
+            ui.label("Single-byte");
+            ui.selectable_value(&mut settings.pixel_style, PixelStyle::Colorful, "Default");
             ui.selectable_value(&mut settings.pixel_style, PixelStyle::Category, "Category");
+            ui.horizontal_wrapped(|ui| {
+                ui.selectable_value(
+                    &mut settings.pixel_style,
+                    PixelStyle::Grayscale,
+                    "Grayscale",
+                );
+                ui.selectable_value(
+                    &mut settings.pixel_style,
+                    PixelStyle::GradientMagma,
+                    "Magma",
+                );
+                ui.selectable_value(
+                    &mut settings.pixel_style,
+                    PixelStyle::GradientPlasma,
+                    "Plasma",
+                );
+                ui.selectable_value(
+                    &mut settings.pixel_style,
+                    PixelStyle::GradientViridis,
+                    "Viridis",
+                );
+                ui.selectable_value(
+                    &mut settings.pixel_style,
+                    PixelStyle::GradientRainbow,
+                    "Rainbow",
+                );
+                ui.selectable_value(
+                    &mut settings.pixel_style,
+                    PixelStyle::GradientTurbo,
+                    "Turbo",
+                );
+                ui.selectable_value(
+                    &mut settings.pixel_style,
+                    PixelStyle::GradientCubehelix,
+                    "Cubehelix",
+                );
+            });
             ui.selectable_value(
                 &mut settings.pixel_style,
-                PixelStyle::GradientMagma,
-                "Gradient (Magma)",
+                PixelStyle::Entropy,
+                "Entropy (slow)",
             );
-            ui.selectable_value(
-                &mut settings.pixel_style,
-                PixelStyle::GradientPlasma,
-                "Gradient (Plasma)",
-            );
-            ui.selectable_value(
-                &mut settings.pixel_style,
-                PixelStyle::GradientViridis,
-                "Gradient (Viridis)",
-            );
-            ui.selectable_value(
-                &mut settings.pixel_style,
-                PixelStyle::GradientRainbow,
-                "Gradient (Rainbow)",
-            );
+
+            ui.separator();
+            ui.label("Multi-byte (color)");
             ui.selectable_value(&mut settings.pixel_style, PixelStyle::RGBA, "RGBA");
             ui.selectable_value(&mut settings.pixel_style, PixelStyle::ABGR, "ABGR");
             ui.selectable_value(&mut settings.pixel_style, PixelStyle::RGB, "RGB");
             ui.selectable_value(&mut settings.pixel_style, PixelStyle::BGR, "BGR");
+            ui.separator();
+            ui.label("Multi-byte (data types)");
             ui.selectable_value(&mut settings.pixel_style, PixelStyle::U16BE, "U16 (BE)");
             ui.selectable_value(&mut settings.pixel_style, PixelStyle::U16LE, "U16 (LE)");
             ui.selectable_value(&mut settings.pixel_style, PixelStyle::U32BE, "U32 (BE)");
@@ -169,10 +194,14 @@ impl Gui {
             ui.selectable_value(&mut settings.pixel_style, PixelStyle::I32LE, "I32 (LE)");
             ui.selectable_value(&mut settings.pixel_style, PixelStyle::F32BE, "F32 (BE)");
             ui.selectable_value(&mut settings.pixel_style, PixelStyle::F32LE, "F32 (LE)");
+            ui.horizontal(|ui| {
+                ui.label("min:");
+                ui.add(egui::DragValue::new(&mut settings.value_range.0));
+                ui.label("max:");
+                ui.add(egui::DragValue::new(&mut settings.value_range.1));
+            });
             ui.separator();
-            ui.add(egui::DragValue::new(&mut settings.value_range.0));
-            ui.add(egui::DragValue::new(&mut settings.value_range.1));
-            ui.separator();
+
             ui.checkbox(&mut settings.hex_view_visible, "hex view");
             ui.separator();
             let file_size = settings
