@@ -282,6 +282,8 @@ impl Gui {
 
             ui.checkbox(&mut settings.hex_view_visible, "hex view");
             ui.separator();
+            
+            ui.add(egui::Label::new("Information").heading());
             let file_size = settings
                 .buffer_length
                 .file_size(file_size_opts::BINARY)
