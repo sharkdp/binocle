@@ -98,14 +98,29 @@ impl Gui {
                     .text("width"),
             );
             ui.horizontal(|ui| {
-                if ui.button("÷ 2").clicked() && settings.width >= 2 {
-                    settings.width = settings.width / 2;
+                if ui
+                    .add(egui::Button::new("÷ 2").enabled(settings.width % 2 == 0))
+                    .clicked()
+                {
+                    settings.width /= 2;
                 }
-                if ui.button("÷ 3").clicked() && settings.width >= 3 {
-                    settings.width = settings.width / 3;
+                if ui
+                    .add(egui::Button::new("÷ 3").enabled(settings.width % 3 == 0))
+                    .clicked()
+                {
+                    settings.width /= 3;
                 }
-                if ui.button("÷ 5").clicked() && settings.width >= 5 {
-                    settings.width = settings.width / 5;
+                if ui
+                    .add(egui::Button::new("÷ 5").enabled(settings.width % 5 == 0))
+                    .clicked()
+                {
+                    settings.width /= 5;
+                }
+                if ui
+                    .add(egui::Button::new("÷ 7").enabled(settings.width % 7 == 0))
+                    .clicked()
+                {
+                    settings.width /= 7;
                 }
                 if ui.button("× 2").clicked() && 2 * settings.width <= max_width {
                     settings.width *= 2;
