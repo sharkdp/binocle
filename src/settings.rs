@@ -84,7 +84,7 @@ impl Default for Settings {
         Self {
             zoom: 1,
             zoom_range: (1, 7),
-            width: 512,
+            width: 1024,
             offset: 0,
             offset_fine: 0,
             stride: 1,
