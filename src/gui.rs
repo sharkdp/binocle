@@ -196,9 +196,9 @@ impl Gui {
             ui.selectable_value(&mut settings.pixel_style, PixelStyle::F32LE, "F32 (LE)");
             ui.horizontal(|ui| {
                 ui.label("min:");
-                ui.add(egui::DragValue::new(&mut settings.value_range.0));
+                ui.add(egui::DragValue::new(&mut settings.value_range.0).speed(10.0));
                 ui.label("max:");
-                ui.add(egui::DragValue::new(&mut settings.value_range.1));
+                ui.add(egui::DragValue::new(&mut settings.value_range.1).speed(10.0));
             });
             ui.separator();
 
