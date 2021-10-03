@@ -220,17 +220,14 @@ impl Gui {
             egui::TopBottomPanel::bottom("hex view").show(ctx, |ui| {
                 ui.horizontal(|ui| {
                     ui.add(
-                        egui::TextEdit::multiline(&mut settings.hex_view)
-                            .text_style(egui::TextStyle::Monospace)
-                            .enabled(false)
-                            .frame(false)
-                            .desired_width(840.0),
+                        egui::Label::new(&mut settings.hex_view)
+                            .monospace()
+                            .wrap(false)
                     );
                     ui.add(
-                        egui::TextEdit::multiline(&mut settings.hex_ascii)
-                            .text_style(egui::TextStyle::Monospace)
-                            .enabled(false)
-                            .frame(false),
+                        egui::Label::new(&mut settings.hex_ascii)
+                        .monospace()
+                            .wrap(false)
                     );
                 });
             });
