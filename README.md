@@ -17,7 +17,9 @@ the *width* of the rectangular grid as well as the way in which (groups of) byte
 
 <p align="center"><img src="assets/binary-view.png" /></p>
 
-## Screenshots
+## Preview
+
+[**Watch a short screencast here**](https://shark.fish/binocle.mp4)
 
 ![](assets/screenshot.png)
 
