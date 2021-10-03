@@ -14,14 +14,14 @@ impl Writer {
     }
 
     fn section(&mut self, title: &str) -> Result<()> {
-        self.file.write(&vec![0x42; 10])?;
-        self.file.write(title.as_bytes())?;
-        self.file.write(&vec![0x42; 10])?;
+        self.file.write_all(&vec![0x42; 10])?;
+        self.file.write_all(title.as_bytes())?;
+        self.file.write_all(&vec![0x42; 10])?;
         Ok(())
     }
 
     fn add(&mut self, buf: &[u8]) -> Result<()> {
-        self.file.write(buf)?;
+        self.file.write_all(buf)?;
         Ok(())
     }
 }
