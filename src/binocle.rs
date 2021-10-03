@@ -100,9 +100,12 @@ impl Binocle {
                     &settings.datatype_settings.datatype,
                     settings.datatype_settings.signedness,
                 ) {
+                    (GuiDatatype::Integer8, signedness) => Datatype::Integer8(signedness),
                     (GuiDatatype::Integer16, signedness) => Datatype::Integer16(signedness),
                     (GuiDatatype::Integer32, signedness) => Datatype::Integer32(signedness),
+                    (GuiDatatype::Integer64, signedness) => Datatype::Integer64(signedness),
                     (GuiDatatype::Float32, _) => Datatype::Float32,
+                    (GuiDatatype::Float64, _) => Datatype::Float64,
                 },
                 settings.datatype_settings.endianness,
                 settings.value_range,

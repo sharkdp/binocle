@@ -24,9 +24,12 @@ pub enum PixelStyle {
 
 #[derive(Clone,PartialEq)]
 pub enum GuiDatatype {
+    Integer8,
     Integer16,
     Integer32,
+    Integer64,
     Float32,
+    Float64,
 }
 
 pub struct DatatypeSettings {

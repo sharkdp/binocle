@@ -197,6 +197,11 @@ impl Gui {
                 ui.horizontal_wrapped(|ui| {
                     ui.selectable_value(
                         &mut settings.datatype_settings.datatype,
+                        GuiDatatype::Integer8,
+                        "Integer (8 bit)",
+                    );
+                    ui.selectable_value(
+                        &mut settings.datatype_settings.datatype,
                         GuiDatatype::Integer16,
                         "Integer (16 bit)",
                     );
@@ -207,16 +212,29 @@ impl Gui {
                     );
                     ui.selectable_value(
                         &mut settings.datatype_settings.datatype,
+                        GuiDatatype::Integer64,
+                        "Integer (64 bit)",
+                    );
+                    ui.selectable_value(
+                        &mut settings.datatype_settings.datatype,
                         GuiDatatype::Float32,
                         "Float (32 bit)",
                     );
+                    ui.selectable_value(
+                        &mut settings.datatype_settings.datatype,
+                        GuiDatatype::Float64,
+                        "Float (64 bit)",
+                    );
                 });
-
+                ui.label("Signedness");
                 ui.horizontal(|ui| {
                     // Only enable for datatypes that have 'signedness'
                     ui.set_enabled(match settings.datatype_settings.datatype {
-                        GuiDatatype::Integer16 | GuiDatatype::Integer32 => true,
-                        GuiDatatype::Float32 => false,
+                        GuiDatatype::Integer8
+                        | GuiDatatype::Integer16
+                        | GuiDatatype::Integer32
+                        | GuiDatatype::Integer64 => true,
+                        GuiDatatype::Float32 | GuiDatatype::Float64 => false,
                     });
                     ui.selectable_value(
                         &mut settings.datatype_settings.signedness,
@@ -229,8 +247,17 @@ impl Gui {
                         "Signed",
                     );
                 });
-
+                ui.label("Endianness");
                 ui.horizontal(|ui| {
+                    // Only enable for datatypes that are multi-byte
+                    ui.set_enabled(match settings.datatype_settings.datatype {
+                        GuiDatatype::Integer8 => false,
+                        GuiDatatype::Integer16
+                        | GuiDatatype::Integer32
+                        | GuiDatatype::Integer64
+                        | GuiDatatype::Float32
+                        | GuiDatatype::Float64 => true,
+                    });
                     ui.selectable_value(
                         &mut settings.datatype_settings.endianness,
                         Endianness::Little,
@@ -242,7 +269,7 @@ impl Gui {
                         "Big Endian",
                     );
                 });
-
+                ui.label("");
                 ui.horizontal(|ui| {
                     ui.label("min:");
                     ui.add(egui::DragValue::new(&mut settings.value_range.0).speed(10.0));
