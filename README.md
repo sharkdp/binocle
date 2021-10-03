@@ -17,6 +17,10 @@ the *width* of the rectangular grid as well as the way in which (groups of) byte
 
 <p align="center"><img src="assets/binary-view.png" /></p>
 
+## Screenshots
+
+![](assets/screenshot.png)
+
 ## Related work
 
   - [A Visual Study of Primitive Binary Fragment Types](http://www.rumint.org/gregconti/publications/taxonomy-bh.pdf)
