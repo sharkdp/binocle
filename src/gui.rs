@@ -135,10 +135,10 @@ impl Gui {
             ui.separator();
 
             ui.add(egui::Label::new("Pixel style").heading());
-            ui.selectable_value(&mut settings.pixel_style, PixelStyle::Colorful, "Default");
-            ui.selectable_value(&mut settings.pixel_style, PixelStyle::Category, "Category");
-            ui.selectable_value(&mut settings.pixel_style, PixelStyle::Datatype, "Datatype");
+            ui.label("Single byte");
             ui.horizontal_wrapped(|ui| {
+                ui.selectable_value(&mut settings.pixel_style, PixelStyle::Colorful, "Default");
+                ui.selectable_value(&mut settings.pixel_style, PixelStyle::Category, "Category");
                 ui.selectable_value(
                     &mut settings.pixel_style,
                     PixelStyle::Grayscale,
@@ -174,21 +174,23 @@ impl Gui {
                     PixelStyle::GradientCubehelix,
                     "Cubehelix",
                 );
+                ui.selectable_value(
+                    &mut settings.pixel_style,
+                    PixelStyle::Entropy,
+                    "Entropy (slow)",
+                );
             });
-            ui.selectable_value(
-                &mut settings.pixel_style,
-                PixelStyle::Entropy,
-                "Entropy (slow)",
-            );
 
+            ui.label("Multi-byte");
+            ui.horizontal(|ui| {
+                ui.selectable_value(&mut settings.pixel_style, PixelStyle::RGBA, "RGBA");
+                ui.selectable_value(&mut settings.pixel_style, PixelStyle::ABGR, "ABGR");
+                ui.selectable_value(&mut settings.pixel_style, PixelStyle::RGB, "RGB");
+                ui.selectable_value(&mut settings.pixel_style, PixelStyle::BGR, "BGR");
+            });
+            ui.selectable_value(&mut settings.pixel_style, PixelStyle::Datatype, "Datatype");
             ui.separator();
-            ui.label("Multi-byte (color)");
-            ui.selectable_value(&mut settings.pixel_style, PixelStyle::RGBA, "RGBA");
-            ui.selectable_value(&mut settings.pixel_style, PixelStyle::ABGR, "ABGR");
-            ui.selectable_value(&mut settings.pixel_style, PixelStyle::RGB, "RGB");
-            ui.selectable_value(&mut settings.pixel_style, PixelStyle::BGR, "BGR");
-            ui.separator();
-            ui.label("Multi-byte (data types)");
+            ui.label("Datatype");
             ui.vertical(|ui| {
                 ui.set_enabled(settings.pixel_style == PixelStyle::Datatype);
 
@@ -211,6 +213,11 @@ impl Gui {
                 });
 
                 ui.horizontal(|ui| {
+                    // Only enable for datatypes that have 'signedness'
+                    ui.set_enabled(match settings.datatype_settings.datatype {
+                        GuiDatatype::Integer16 | GuiDatatype::Integer32 => true,
+                        GuiDatatype::Float32 => false,
+                    });
                     ui.selectable_value(
                         &mut settings.datatype_settings.signedness,
                         Signedness::Unsigned,
@@ -224,10 +231,6 @@ impl Gui {
                 });
 
                 ui.horizontal(|ui| {
-                    ui.set_enabled(match settings.datatype_settings.datatype {
-                        GuiDatatype::Integer16 | GuiDatatype::Integer32 => true,
-                        GuiDatatype::Float32 => false,
-                    });
                     ui.selectable_value(
                         &mut settings.datatype_settings.endianness,
                         Endianness::Little,
