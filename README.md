@@ -21,6 +21,28 @@ the *width* of the rectangular grid as well as the way in which (groups of) byte
 
 ![](assets/screenshot.png)
 
+## Installation
+
+### On Ubuntu
+
+Download the appropriate `.deb` package from the [Release page](https://github.com/sharkdp/binocle/releases)
+and install it via `dpkg`:
+```
+wget https://github.com/sharkdp/binocle/releases/download/v0.1.0/binocle_0.1.0_amd64.deb
+sudo dpkg -i binocle_0.1.0_amd64.deb
+```
+
+### From binaries (Linux, macOS, Windows)
+
+Download the corresponding archive from the [Release page](https://github.com/sharkdp/binocle/releases).
+
+### With cargo (Linux, macOS, Windows)
+
+binocle can be installed via [cargo](https://doc.rust-lang.org/cargo/):
+```
+cargo install binocle
+```
+
 ## Related work
 
   - [A Visual Study of Primitive Binary Fragment Types](http://www.rumint.org/gregconti/publications/taxonomy-bh.pdf)
