@@ -209,14 +209,9 @@ pub fn run(filename: &OsStr) -> Result<()> {
                     }
                 }
 
-                if input.mouse_pressed(0) {
-                    if let Some((x, y)) = input.mouse() {
-                        if input.held_alt() {
-                            mouse_drag_action = MouseDragAction::ControlWidth {
-                                start_x: x,
-                                start_width: settings.width,
-                            };
-                        } else if input.held_shift() {
+                if let Some((x, y)) = input.mouse() {
+                    if input.mouse_pressed(0) {
+                        if input.held_shift() {
                             mouse_drag_action = MouseDragAction::ControlOffsetFine {
                                 start_x: x,
                                 start_offset_fine: settings.offset_fine,
@@ -227,14 +222,19 @@ pub fn run(filename: &OsStr) -> Result<()> {
                                 start_offset: settings.offset,
                             };
                         }
+                    } else if input.mouse_pressed(1) {
+                        mouse_drag_action = MouseDragAction::ControlWidth {
+                            start_x: x,
+                            start_width: settings.width,
+                        };
                     }
                 }
 
-                if input.mouse_released(0) {
+                if input.mouse_released(0) || input.mouse_released(1) {
                     mouse_drag_action = MouseDragAction::Nothing;
                 }
 
-                if input.mouse_held(0) {
+                if input.mouse_held(0) || input.mouse_held(1) {
                     if let Some((x, y)) = input.mouse() {
                         let zoom_factor = settings.zoom_factor();
                         match mouse_drag_action {
