@@ -1,4 +1,11 @@
-<p align="center"><img src="assets/logo.png" /></p>
+<p align="center">
+  <img src="assets/logo.png" />
+  <br>
+  <a href="#examples">Examples</a> • 
+  <a href="#how-it-works">How it works</a> • 
+  <a href="https://shark.fish/binocle.mp4">Screencast</a> • 
+  <a href="#installation">Installation</a>
+</p>
 
 *binocle* is a graphical tool to visualize binary data.
 It colorizes bytes according to different rules and renders them as pixels in a rectangular grid.
