@@ -1,5 +1,11 @@
 [package]
+authors = ["David Peter <mail@david-peter.de>"]
+description = "A graphical tool to visualize binary data"
+homepage = "https://github.com/sharkdp/binocle"
+license = "MIT/Apache-2.0"
 name = "binocle"
+readme = "README.md"
+repository = "https://github.com/sharkdp/binocle"
 version = "0.1.0"
 edition = "2018"
 resolver = "2"
