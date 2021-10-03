@@ -43,6 +43,12 @@ binocle can be installed via [cargo](https://doc.rust-lang.org/cargo/):
 cargo install binocle
 ```
 
+## License
+
+binocle is dual-licensed under the terms of the MIT License and the Apache License 2.0.
+
+See the [LICENSE-APACHE](LICENSE-APACHE) and [LICENSE-MIT](LICENSE-MIT) files for details.
+
 ## Related work
 
   - [A Visual Study of Primitive Binary Fragment Types](http://www.rumint.org/gregconti/publications/taxonomy-bh.pdf)
