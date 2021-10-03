@@ -50,12 +50,14 @@ impl Style for Category {
                 [0, 0, 0, 255]
             } else if b == 0xFF {
                 [255, 255, 255, 255]
-            } else if b.is_ascii_graphic() {
-                [60, 255, 96, 255]
-            } else if b.is_ascii_whitespace() {
-                [240, 240, 240, 255]
-            } else if b.is_ascii() {
+            } else if b.is_ascii_alphanumeric() {
                 [60, 178, 255, 255]
+            } else if b.is_ascii_punctuation() {
+                [0, 129, 213, 255]
+            } else if b.is_ascii_whitespace() {
+                [162, 218, 255, 255]
+            } else if b.is_ascii() {
+                [60, 255, 137, 255]
             } else {
                 [249, 53, 94, 255]
             }
