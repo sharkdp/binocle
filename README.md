@@ -2,8 +2,8 @@
   <img src="assets/logo.png" />
   <br>
   <a href="#examples">Examples</a> • 
-  <a href="#how-it-works">How it works</a> • 
   <a href="https://shark.fish/binocle.mp4">Screencast</a> • 
+  <a href="#how-it-works">How it works</a> • 
   <a href="#installation">Installation</a>
 </p>
 
@@ -17,18 +17,18 @@ This allows users to identify interesting parts in large files and to reveal ima
 |---|---|---|---|
 | <img src="assets/example-elf.png" width="200" /> | <img src="assets/example-teams-memdump.png" width="200" /> | <img src="assets/example-doom.png" width="200" /> | <img src="assets/example-perf-record.png" width="200" /> |
 
+## Preview
+
+[**Watch a short screencast here**](https://shark.fish/binocle.mp4)
+
+![](assets/screenshot.png)
+
 ## How it works
 
 The program allows you to control various parameters like the *offset* into the file, the *stride*,
 the *width* of the rectangular grid as well as the way in which (groups of) bytes are colorized.
 
 <p align="center"><img src="assets/binary-view.png" /></p>
-
-## Preview
-
-[**Watch a short screencast here**](https://shark.fish/binocle.mp4)
-
-![](assets/screenshot.png)
 
 ## Installation
 
