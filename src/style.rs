@@ -1,5 +1,6 @@
 use std::convert::TryInto;
 
+use crate::datatype::{Datatype, Endianness};
 use crate::view::View;
 
 pub type Color = [u8; 4];
@@ -93,28 +94,15 @@ impl Style for ColorGradient {
     }
 }
 
-#[derive(Clone, Copy)]
-pub enum Endianness {
-    Big,
-    Little,
-}
-pub enum Datatype {
-    Unsigned16(Endianness),
-    Unsigned32(Endianness),
-    Signed32(Endianness),
-    Float32(Endianness),
-}
-
-impl Datatype {}
-
 pub struct DatatypeStyle {
     datatype: Datatype,
+    endianness: Endianness,
     colors: Vec<Color>,
     range: (f32, f32),
 }
 
 impl DatatypeStyle {
-    pub fn new(datatype: Datatype, range: (f32, f32)) -> Self {
+    pub fn new(datatype: Datatype, endianness: Endianness, range: (f32, f32)) -> Self {
         let num_colors = 1024;
         let mut colors = Vec::new();
         colors.reserve(num_colors);
@@ -128,6 +116,7 @@ impl DatatypeStyle {
 
         DatatypeStyle {
             datatype,
+            endianness,
             colors,
             range,
         }
@@ -148,48 +137,13 @@ impl DatatypeStyle {
 
 impl Style for DatatypeStyle {
     fn color_at_index(&mut self, view: &View, view_index: isize) -> Color {
-        let maybe_t: Option<f32> = match self.datatype {
-            Datatype::Unsigned16(endianness) => view
-                .slice_at(view_index, 2)
-                .and_then(|slice| {
-                    slice.try_into().ok().map(match endianness {
-                        Endianness::Little => u16::from_le_bytes,
-                        Endianness::Big => u16::from_be_bytes,
-                    })
-                })
-                .map(|uint| uint as f32),
-            Datatype::Unsigned32(endianness) => view
-                .slice_at(view_index, 4)
-                .and_then(|slice| {
-                    slice.try_into().ok().map(match endianness {
-                        Endianness::Little => u32::from_le_bytes,
-                        Endianness::Big => u32::from_be_bytes,
-                    })
-                })
-                .map(|uint| uint as f32),
-            Datatype::Signed32(endianness) => view
-                .slice_at(view_index, 4)
-                .and_then(|slice| {
-                    slice.try_into().ok().map(match endianness {
-                        Endianness::Little => i32::from_le_bytes,
-                        Endianness::Big => i32::from_be_bytes,
-                    })
-                })
-                .map(|int| int as f32),
-            Datatype::Float32(endianness) => view.slice_at(view_index, 4).and_then(|slice| {
-                slice.try_into().ok().map(match endianness {
-                    Endianness::Little => f32::from_le_bytes,
-                    Endianness::Big => f32::from_be_bytes,
-                })
-            }),
-        };
-
-        if let Some(t) = maybe_t {
-            let (min, max) = self.range;
-            self.color_from_float((t - min) / (max - min))
-        } else {
-            [0, 0, 0, 0]
-        }
+        view.slice_at(view_index, self.datatype.size())
+            .and_then(|slice| self.datatype.read_as_float_from(slice, self.endianness))
+            .map(|t| {
+                let (min, max) = self.range;
+                self.color_from_float((t - min) / (max - min))
+            })
+            .unwrap_or([0, 0, 0, 0])
     }
 }
 

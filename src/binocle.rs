@@ -3,10 +3,11 @@ use std::ffi::OsStr;
 use anyhow::Result;
 
 use crate::buffer::Buffer;
+use crate::datatype::{Datatype, Endianness, Signedness};
 use crate::settings::{PixelStyle, Settings, WIDTH};
 use crate::style::{
-    Category, ColorGradient, Colorful, Datatype, DatatypeStyle, Endianness, Entropy, Grayscale,
-    Style, ABGR, BGR, RGB, RGBA,
+    Category, ColorGradient, Colorful, DatatypeStyle, Entropy, Grayscale, Style, ABGR, BGR, RGB,
+    RGBA,
 };
 use crate::view::View;
 
@@ -95,35 +96,43 @@ impl Binocle {
             PixelStyle::BGR => Box::new(BGR {}),
             PixelStyle::Entropy => Box::new(Entropy::with_window_size(32)),
             PixelStyle::U16BE => Box::new(DatatypeStyle::new(
-                Datatype::Unsigned16(Endianness::Big),
+                Datatype::Integer16(Signedness::Unsigned),
+                Endianness::Big,
                 settings.value_range,
             )),
             PixelStyle::U16LE => Box::new(DatatypeStyle::new(
-                Datatype::Unsigned16(Endianness::Little),
+                Datatype::Integer16(Signedness::Unsigned),
+                Endianness::Little,
                 settings.value_range,
             )),
             PixelStyle::U32BE => Box::new(DatatypeStyle::new(
-                Datatype::Unsigned32(Endianness::Big),
+                Datatype::Integer32(Signedness::Unsigned),
+                Endianness::Big,
                 settings.value_range,
             )),
             PixelStyle::U32LE => Box::new(DatatypeStyle::new(
-                Datatype::Unsigned32(Endianness::Little),
+                Datatype::Integer32(Signedness::Unsigned),
+                Endianness::Little,
                 settings.value_range,
             )),
             PixelStyle::I32BE => Box::new(DatatypeStyle::new(
-                Datatype::Signed32(Endianness::Big),
+                Datatype::Integer32(Signedness::Signed),
+                Endianness::Big,
                 settings.value_range,
             )),
             PixelStyle::I32LE => Box::new(DatatypeStyle::new(
-                Datatype::Signed32(Endianness::Little),
+                Datatype::Integer32(Signedness::Signed),
+                Endianness::Little,
                 settings.value_range,
             )),
             PixelStyle::F32BE => Box::new(DatatypeStyle::new(
-                Datatype::Float32(Endianness::Big),
+                Datatype::Float32,
+                Endianness::Big,
                 settings.value_range,
             )),
             PixelStyle::F32LE => Box::new(DatatypeStyle::new(
-                Datatype::Float32(Endianness::Little),
+                Datatype::Float32,
+                Endianness::Little,
                 settings.value_range,
             )),
         };

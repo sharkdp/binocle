@@ -8,6 +8,7 @@ mod gui;
 mod settings;
 mod style;
 mod view;
+mod datatype;
 
 fn main() -> anyhow::Result<()> {
     let mut args = env::args_os();
