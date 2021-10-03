@@ -257,13 +257,13 @@ pub fn run(filename: &OsStr) -> Result<()> {
 
                     if input.mouse_held(0) || input.mouse_held(1) {
                         if let Some((x, y)) = input.mouse() {
-                            let zoom_factor = settings.zoom_factor();
+                            let zoom_factor = settings.zoom_factor() as f32;
                             match mouse_drag_action {
                                 MouseDragAction::ControlOffset {
                                     start_y,
                                     start_offset,
                                 } => {
-                                    let delta_y = y - start_y;
+                                    let delta_y = (y - start_y) / zoom_factor;
                                     let min_offset =
                                         start_offset % (settings.width * settings.stride);
                                     settings.offset = min_offset.max(
@@ -275,7 +275,7 @@ pub fn run(filename: &OsStr) -> Result<()> {
                                     start_x,
                                     start_offset_fine,
                                 } => {
-                                    let delta_x = x - start_x;
+                                    let delta_x = (x - start_x) / zoom_factor;
                                     settings.offset_fine =
                                         start_offset_fine - (delta_x as isize) * settings.stride;
                                 }
@@ -283,8 +283,8 @@ pub fn run(filename: &OsStr) -> Result<()> {
                                     start_x,
                                     start_width,
                                 } => {
-                                    let delta_x = x - start_x;
-                                    settings.width = start_width + (delta_x as isize) / zoom_factor;
+                                    let delta_x = (x - start_x) / zoom_factor;
+                                    settings.width = start_width + (delta_x as isize);
                                 }
                                 MouseDragAction::Nothing => {}
                             }
