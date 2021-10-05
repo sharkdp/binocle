@@ -63,3 +63,4 @@ See the [LICENSE-APACHE](LICENSE-APACHE) and [LICENSE-MIT](LICENSE-MIT) files fo
   - [A Visual Study of Primitive Binary Fragment Types](http://www.rumint.org/gregconti/publications/taxonomy-bh.pdf)
   - [binvis.io](http://binvis.io/)
   - [cantor.dust](https://sites.google.com/site/xxcantorxdustxx/) ([talk](https://www.youtube.com/watch?v=4bM3Gut1hIk))
+  - [veles.io](https://veles.io) ([GitHub](https://github.com/codilime/veles))
