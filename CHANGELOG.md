@@ -11,6 +11,9 @@
 
 ## Packaging
 
+# v0.1.2
+
+- Update to new wgpu version, minor fixes
 
 # v0.1.1
 
