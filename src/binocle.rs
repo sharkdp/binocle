@@ -18,7 +18,10 @@ pub struct Binocle {
 
 impl Binocle {
     pub fn new(path: &OsStr) -> Result<Self> {
-        let buffer = Buffer::from_file(path)?;
+        // TODO: put in something here to allow calling from_file rather than from_mmap.
+        // That probably calls for more robust command processing in general though.
+        // Perhaps clap?
+        let buffer = Buffer::from_mmap(path)?;
 
         let buffer_length = buffer.len();
         let mut settings = Settings::default();
