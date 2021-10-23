@@ -1,9 +1,8 @@
-use std::ffi::OsStr;
-
 use anyhow::Result;
 
 use crate::buffer::Buffer;
 use crate::datatype::Datatype;
+use crate::options::{BackingOption, CliOptions};
 use crate::settings::{GuiDatatype, PixelStyle, Settings, WIDTH};
 use crate::style::{
     Category, ColorGradient, Colorful, DatatypeStyle, Entropy, Grayscale, Style, ABGR, BGR, RGB,
@@ -17,11 +16,11 @@ pub struct Binocle {
 }
 
 impl Binocle {
-    pub fn new(path: &OsStr) -> Result<Self> {
-        // TODO: put in something here to allow calling from_file rather than from_mmap.
-        // That probably calls for more robust command processing in general though.
-        // Perhaps clap?
-        let buffer = Buffer::from_mmap(path)?;
+    pub fn new(options: CliOptions) -> Result<Self> {
+        let buffer = match options.backing {
+            BackingOption::File => Buffer::from_file(options.filename),
+            BackingOption::Mmap => Buffer::from_mmap(options.filename),
+        }?;
 
         let buffer_length = buffer.len();
         let mut settings = Settings::default();

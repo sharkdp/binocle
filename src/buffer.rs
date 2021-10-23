@@ -2,7 +2,7 @@ use memmap2::Mmap;
 use std::io::{BufReader, Read};
 use std::{fs::File, io, path::Path};
 
-struct MMapBacking {
+pub struct MMapBacking {
     _file: File,
     pub mmap: Mmap,
 }
