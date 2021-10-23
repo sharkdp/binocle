@@ -15,7 +15,7 @@ optimize = ["log/release_max_level_warn"]
 default = ["optimize"]
 
 [dependencies]
-clap = "3.0.0-beta.5"
+clap = "3.0.0-beta.4"
 colorgrad = "0.5"
 egui = "0.14"
 egui_wgpu_backend = "0.13"
