@@ -7,8 +7,8 @@ name = "binocle"
 readme = "README.md"
 repository = "https://github.com/sharkdp/binocle"
 version = "0.1.2"
-edition = "2018"
-resolver = "2"
+edition = "2021"
+rust-version = "1.56"
 
 [features]
 optimize = ["log/release_max_level_warn"]
