@@ -27,13 +27,13 @@ impl Buffer {
 
         reader.read_to_end(&mut data)?;
 
-        return Ok(Buffer::VecBuffer(data));
+        Ok(Buffer::VecBuffer(data))
     }
 
     pub fn from_mmap<P: AsRef<Path>>(path: P) -> io::Result<Self> {
         let file = File::open(path)?;
         let mmap = unsafe { Mmap::map(&file)? };
-        return Ok(Buffer::MmapBuffer(MMapBacking::new(file, mmap)));
+        Ok(Buffer::MmapBuffer(MMapBacking::new(file, mmap)))
     }
 
     pub fn len(&self) -> usize {
