@@ -1,4 +1,3 @@
-use std::ffi::OsStr;
 use std::path::Path;
 
 use anyhow::Result;
@@ -12,6 +11,7 @@ use winit_input_helper::WinitInputHelper;
 
 use crate::binocle::Binocle;
 use crate::gui::Gui;
+use crate::options::CliOptions;
 use crate::settings::{HEIGHT, WIDTH};
 
 enum MouseDragAction {
@@ -30,7 +30,7 @@ enum MouseDragAction {
     },
 }
 
-pub fn run(filename: &OsStr) -> Result<()> {
+pub fn run(options: CliOptions) -> Result<()> {
     env_logger::init();
     let event_loop = EventLoop::new();
     let mut input = WinitInputHelper::new();
@@ -39,7 +39,7 @@ pub fn run(filename: &OsStr) -> Result<()> {
         WindowBuilder::new()
             .with_title(&format!(
                 "binocle - {}",
-                Path::new(filename)
+                Path::new(&options.filename)
                     .file_name()
                     .map(|f| f.to_string_lossy())
                     .as_deref()
@@ -61,7 +61,7 @@ pub fn run(filename: &OsStr) -> Result<()> {
         (pixels, gui)
     };
 
-    let mut binocle = Binocle::new(filename)?;
+    let mut binocle = Binocle::new(options)?;
 
     let mut mouse_drag_action = MouseDragAction::Nothing;
 
