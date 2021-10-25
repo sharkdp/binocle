@@ -2,7 +2,7 @@ use clap::Parser;
 use std::str::FromStr;
 
 #[derive(Parser)]
-#[clap(version = "0.1.2", author = "David Peter <mail@david-peter.de")]
+#[clap(version = "0.1.2", author = "David Peter <mail@david-peter.de>")]
 pub struct CliOptions {
     pub filename: String,
     #[clap(
