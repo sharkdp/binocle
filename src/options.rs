@@ -1,8 +1,8 @@
-use clap::Parser;
+use clap::{Parser, crate_version};
 use std::str::FromStr;
 
 #[derive(Parser)]
-#[clap(version = "0.1.2", author = "David Peter <mail@david-peter.de>")]
+#[clap(version = crate_version!(), author = "David Peter <mail@david-peter.de>")]
 pub struct CliOptions {
     pub filename: String,
     #[clap(
