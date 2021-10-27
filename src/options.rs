@@ -1,4 +1,4 @@
-use clap::{Parser, crate_version, crate_description};
+use clap::{crate_description, crate_version, Parser};
 use std::str::FromStr;
 
 #[derive(Parser)]
