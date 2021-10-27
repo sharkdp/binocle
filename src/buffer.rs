@@ -45,7 +45,7 @@ impl Buffer {
 
     pub fn data(&self) -> &[u8] {
         match self {
-            Buffer::VecBuffer(data) => &data,
+            Buffer::VecBuffer(data) => data,
             Buffer::MmapBuffer(mmap) => &mmap.mmap,
         }
     }

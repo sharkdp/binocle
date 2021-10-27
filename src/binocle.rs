@@ -23,8 +23,10 @@ impl Binocle {
         }?;
 
         let buffer_length = buffer.len();
-        let mut settings = Settings::default();
-        settings.buffer_length = buffer_length as isize;
+        let settings = Settings {
+            buffer_length: buffer_length as isize,
+            ..Default::default()
+        };
 
         Ok(Self { buffer, settings })
     }
@@ -75,7 +77,7 @@ impl Binocle {
         let settings = &self.settings;
 
         let view = View::new(
-            &self.buffer.data(),
+            self.buffer.data(),
             settings.offset + settings.offset_fine,
             settings.stride,
         );

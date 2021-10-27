@@ -14,9 +14,9 @@ impl Writer {
     }
 
     fn section(&mut self, title: &str) -> Result<()> {
-        self.file.write_all(&vec![0x42; 10])?;
+        self.file.write_all(&[0x42; 10])?;
         self.file.write_all(title.as_bytes())?;
-        self.file.write_all(&vec![0x42; 10])?;
+        self.file.write_all(&[0x42; 10])?;
         Ok(())
     }
 
