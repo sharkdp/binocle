@@ -8,8 +8,9 @@ pub struct CliOptions {
     #[clap(
         name = "backing",
         long,
+        possible_values = ["mmap", "file"],
         default_value = "mmap",
-        about = "Valid options: mmap, file"
+        about = "Whether to use memory mapping to read the file contents or not"
     )]
     pub backing: BackingOption,
 }
@@ -26,7 +27,7 @@ impl FromStr for BackingOption {
         match s.to_lowercase().as_str() {
             "file" => Ok(BackingOption::File),
             "mmap" => Ok(BackingOption::Mmap),
-            _ => Err(anyhow::Error::msg("Could not parse backing option")),
+            _ => unreachable!("clap ensures that this is not reachable"),
         }
     }
 }
