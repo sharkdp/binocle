@@ -113,6 +113,7 @@ dependencies = [
  "egui_winit_platform",
  "env_logger",
  "humansize",
+ "lazy_static",
  "log",
  "memmap2 0.5.0",
  "pixels",
