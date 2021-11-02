@@ -3,6 +3,8 @@ use std::convert::TryInto;
 use crate::datatype::{Datatype, Endianness};
 use crate::view::View;
 
+use lazy_static::lazy_static;
+
 pub type Color = [u8; 4];
 
 fn rgba_from_color(color: colorgrad::Color) -> Color {
@@ -211,6 +213,10 @@ impl Entropy {
     }
 }
 
+lazy_static! {
+    static ref MAGMA: colorgrad::Gradient = colorgrad::magma();
+}
+
 impl Style for Entropy {
     fn init(&mut self, _: &View) {}
 
@@ -231,7 +237,7 @@ impl Style for Entropy {
             }
             entropy *= 1.0f64 / 8.0f64;
 
-            let color = colorgrad::magma().at(entropy);
+            let color = MAGMA.at(entropy);
             [
                 (color.r * 255.0) as u8,
                 (color.g * 255.0) as u8,
