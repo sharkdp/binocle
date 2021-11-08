@@ -238,12 +238,7 @@ impl Style for Entropy {
             entropy *= 1.0f64 / 8.0f64;
 
             let color = MAGMA.at(entropy);
-            [
-                (color.r * 255.0) as u8,
-                (color.g * 255.0) as u8,
-                (color.b * 255.0) as u8,
-                255,
-            ]
+            rgba_from_color(color)
         } else {
             [0, 0, 0, 0]
         }
