@@ -1,12 +1,12 @@
 use std::convert::TryInto;
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Hash)]
 pub enum Endianness {
     Big,
     Little,
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Hash)]
 pub enum Signedness {
     Unsigned,
     Signed,

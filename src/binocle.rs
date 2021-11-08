@@ -112,7 +112,7 @@ impl Binocle {
                     (GuiDatatype::Float64, _) => Datatype::Float64,
                 },
                 settings.datatype_settings.endianness,
-                settings.value_range,
+                (settings.value_range.0 as f32, settings.value_range.1 as f32),
             )),
         };
         style.init(&view);

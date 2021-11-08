@@ -12,7 +12,7 @@ use winit_input_helper::WinitInputHelper;
 use crate::binocle::Binocle;
 use crate::gui::Gui;
 use crate::options::CliOptions;
-use crate::settings::{HEIGHT, WIDTH};
+use crate::settings::{calculate_hash, HEIGHT, WIDTH};
 
 enum MouseDragAction {
     Nothing,
@@ -65,14 +65,20 @@ pub fn run(options: CliOptions) -> Result<()> {
 
     let mut mouse_drag_action = MouseDragAction::Nothing;
 
+    let mut hash_state = HashState::new();
+
     event_loop.run(move |event, _, control_flow| {
         // Update egui inputs
         gui.handle_event(&event);
 
+        hash_state.set(calculate_hash(&binocle.settings));
+
         // Draw the current frame
         if let Event::RedrawRequested(_) = event {
-            // Draw the binocle
-            binocle.draw(pixels.get_frame());
+            if hash_state.check() {
+                // Draw the binocle
+                binocle.draw(pixels.get_frame());
+            }
 
             // Prepare egui
             gui.prepare(&window, &mut binocle.settings);
@@ -323,4 +329,36 @@ pub fn run(options: CliOptions) -> Result<()> {
             window.request_redraw();
         }
     });
+}
+
+/// A small helper struct to be able to check if a change has occured.
+struct HashState {
+    last_state: u64,
+    has_changed: bool,
+}
+
+impl HashState {
+    fn new() -> Self {
+        Self {
+            last_state: 0,
+            has_changed: true,
+        }
+    }
+
+    /// Check if an update is needed. Resets the state.
+    fn check(&mut self) -> bool {
+        if self.has_changed {
+            self.has_changed = false;
+            true
+        } else {
+            false
+        }
+    }
+    /// Sets the new hash, and memorizes if an update is needed.
+    fn set(&mut self, hash: u64) {
+        if hash != self.last_state {
+            self.has_changed = true;
+            self.last_state = hash;
+        }
+    }
 }
