@@ -71,6 +71,9 @@ pub fn run(options: CliOptions) -> Result<()> {
 
         // Draw the current frame
         if let Event::RedrawRequested(_) = event {
+            puffin::GlobalProfiler::lock().new_frame();
+            puffin::profile_scope!("Event::RedrawRequested");
+
             // Draw the binocle
             binocle.draw(pixels.get_frame());
 

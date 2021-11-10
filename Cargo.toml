@@ -12,6 +12,7 @@ rust-version = "1.56"
 
 [features]
 optimize = ["log/release_max_level_warn"]
+trace = [] # Enables tracing with puffin.
 default = ["optimize"]
 
 [dependencies]
@@ -28,3 +29,5 @@ winit_input_helper = "0.10"
 anyhow = "1.0"
 humansize = "1.1"
 memmap2 = "0.5.0"
+puffin = "0.10.1"
+puffin_http = "0.7.3"

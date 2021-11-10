@@ -52,6 +52,23 @@ binocle can be installed via [cargo](https://doc.rust-lang.org/cargo/):
 cargo install binocle
 ```
 
+## Development
+
+Tracing is provided with the [*puffin*](https://github.com/EmbarkStudios/puffin) framework.
+To enable it, the feature *trace* needs to be enabled. Here is how to use it all together:
+
+```bash
+cargo run --example create_test_file
+cargo run --features trace -- binocle_test_file
+```
+
+In another terminal run:
+
+```bash
+cargo install puffin_viewer
+puffin_viewer --url 127.0.0.1:8585
+```
+
 ## License
 
 binocle is dual-licensed under the terms of the MIT License and the Apache License 2.0.

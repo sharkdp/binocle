@@ -74,6 +74,8 @@ impl Binocle {
     }
 
     pub fn draw(&self, frame: &mut [u8]) {
+        puffin::profile_scope!("Binocle::draw");
+
         let settings = &self.settings;
 
         let view = View::new(
