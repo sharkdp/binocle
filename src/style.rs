@@ -3,8 +3,6 @@ use std::convert::TryInto;
 use crate::datatype::{Datatype, Endianness};
 use crate::view::View;
 
-use lazy_static::lazy_static;
-
 pub type Color = [u8; 4];
 
 fn rgba_from_color(color: colorgrad::Color) -> Color {
@@ -201,20 +199,26 @@ pub struct Entropy {
     window_size: usize,
     window_size_f64: f64,
     counts: [i32; 256],
+    /// Cache the gradient color
+    byte_color: [Color; 256],
 }
 
 impl Entropy {
     pub fn with_window_size(window_size: usize) -> Entropy {
+        let gradient = colorgrad::magma();
+        let mut byte_color = [[0, 0, 0, 0]; 256];
+        for (byte, color) in byte_color.iter_mut().enumerate() {
+            let gradient_color = gradient.at((byte as f64) / 255.0f64);
+            *color = rgba_from_color(gradient_color);
+        }
+
         Entropy {
             window_size,
             window_size_f64: window_size as f64,
             counts: [0; 256],
+            byte_color,
         }
     }
-}
-
-lazy_static! {
-    static ref MAGMA: colorgrad::Gradient = colorgrad::magma();
 }
 
 impl Style for Entropy {
@@ -237,8 +241,9 @@ impl Style for Entropy {
             }
             entropy *= 1.0f64 / 8.0f64;
 
-            let color = MAGMA.at(entropy);
-            rgba_from_color(color)
+            let discretized_entropy: usize = ((entropy * self.byte_color.len() as f64) as usize)
+                .clamp(0, self.byte_color.len() - 1);
+            self.byte_color[discretized_entropy]
         } else {
             [0, 0, 0, 0]
         }
