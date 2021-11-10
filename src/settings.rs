@@ -1,12 +1,9 @@
-use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash, Hasher};
-
 use crate::datatype::{Endianness, Signedness};
 
 pub const WIDTH: u32 = 1366;
 pub const HEIGHT: u32 = 1024;
 
-#[derive(PartialEq, Hash)]
+#[derive(PartialEq)]
 
 pub enum PixelStyle {
     Grayscale,
@@ -26,7 +23,7 @@ pub enum PixelStyle {
     Datatype,
 }
 
-#[derive(Clone, PartialEq, Hash)]
+#[derive(Clone, PartialEq)]
 pub enum GuiDatatype {
     Integer8,
     Integer16,
@@ -36,14 +33,12 @@ pub enum GuiDatatype {
     Float64,
 }
 
-#[derive(Hash)]
 pub struct DatatypeSettings {
     pub datatype: GuiDatatype,
     pub signedness: Signedness,
     pub endianness: Endianness,
 }
 
-#[derive(Hash)]
 pub struct Settings {
     pub zoom: isize,
     pub zoom_range: (isize, isize),
@@ -61,7 +56,7 @@ pub struct Settings {
     pub buffer_length: isize,
     pub canvas_width: isize,
 
-    pub value_range: (u32, u32), // TODO: This used to be f32, which cannot be hashed.
+    pub value_range: (f32, f32),
 
     pub hex_view_visible: bool,
     pub hex_view: String,
@@ -103,7 +98,7 @@ impl Default for Settings {
             },
             buffer_length: 0,
             canvas_width: WIDTH as isize,
-            value_range: (0, 100),
+            value_range: (0., 100.),
             hex_view_visible: false,
             hex_view: "".into(),
             hex_ascii: "".into(),
@@ -111,34 +106,4 @@ impl Default for Settings {
             gui_wants_mouse: false,
         }
     }
-}
-
-pub(crate) fn calculate_hash<T: Hash>(t: &T) -> u64 {
-    let mut s = DefaultHasher::new();
-    t.hash(&mut s);
-    s.finish()
-}
-
-#[test]
-fn test_hasher() {
-    let s1 = Settings::default();
-    let s2 = Settings::default();
-    let s3 = {
-        let mut s = Settings::default();
-        s.pixel_style = PixelStyle::GradientPlasma;
-        s
-    };
-
-    assert_eq!(calculate_hash(&s1), calculate_hash(&s2));
-    assert_ne!(calculate_hash(&s1), calculate_hash(&s3));
-}
-
-#[test]
-fn test_hash_pixelstyle() {
-    let p1 = PixelStyle::Category;
-    let p2 = PixelStyle::Category;
-    let p3 = PixelStyle::Colorful;
-
-    assert_eq!(calculate_hash(&p1), calculate_hash(&p2));
-    assert_ne!(calculate_hash(&p1), calculate_hash(&p3));
 }

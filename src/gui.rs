@@ -1,6 +1,6 @@
 use std::time::Instant;
 
-use egui::{ClippedMesh, FontDefinitions};
+use egui::{ClippedMesh, FontDefinitions, Response};
 use egui_wgpu_backend::{BackendError, RenderPass, ScreenDescriptor};
 use egui_winit_platform::{Platform, PlatformDescriptor};
 use humansize::{file_size_opts, FileSize};
@@ -61,7 +61,7 @@ impl Gui {
         self.screen_descriptor.scale_factor = scale_factor as f32;
     }
 
-    pub fn prepare(&mut self, window: &Window, settings: &mut Settings) {
+    pub fn prepare(&mut self, window: &Window, settings: &mut Settings) -> Response {
         self.platform
             .update_time(self.start_time.elapsed().as_secs_f64());
 
@@ -69,20 +69,22 @@ impl Gui {
         self.platform.begin_frame();
 
         // Draw the application.
-        self.ui(&self.platform.context(), settings);
+        let response = self.ui(&self.platform.context(), settings);
 
         // End the egui frame and create all paint jobs to prepare for rendering.
         let (_output, paint_commands) = self.platform.end_frame(Some(window));
         self.paint_jobs = self.platform.context().tessellate(paint_commands);
+
+        response
     }
 
     /// Create the UI using egui.
-    fn ui(&mut self, ctx: &egui::CtxRef, settings: &mut Settings) {
+    fn ui(&mut self, ctx: &egui::CtxRef, settings: &mut Settings) -> Response {
         let max_offset_fine = settings.max_offset_fine();
         let max_width = settings.max_width();
-        egui::SidePanel::right("Settings").show(ctx, |ui| {
-            ui.add(egui::Label::new("Layout").heading());
-            ui.add(
+        let settings_response = egui::SidePanel::right("Settings").show(ctx, |ui| {
+            let mut response = ui.add(egui::Label::new("Layout").heading());
+            response |= ui.add(
                 egui::Slider::new(
                     &mut settings.zoom,
                     settings.zoom_range.0..=settings.zoom_range.1,
@@ -91,151 +93,155 @@ impl Gui {
                 .smart_aim(false)
                 .text("zoom"),
             );
-            ui.add(
+            response |= ui.add(
                 egui::Slider::new(&mut settings.width, 1..=max_width)
                     .clamp_to_range(true)
                     .smart_aim(false)
                     .text("width"),
             );
+
             ui.horizontal(|ui| {
-                if ui
-                    .add(egui::Button::new("÷ 2").enabled(settings.width % 2 == 0))
-                    .clicked()
-                {
+                let r1 = ui.add(egui::Button::new("÷ 2").enabled(settings.width % 2 == 0));
+                if response.clicked() {
                     settings.width /= 2;
                 }
-                if ui
-                    .add(egui::Button::new("÷ 3").enabled(settings.width % 3 == 0))
-                    .clicked()
-                {
+                let r2 = ui.add(egui::Button::new("÷ 3").enabled(settings.width % 3 == 0));
+                if r2.clicked() {
                     settings.width /= 3;
                 }
-                if ui
-                    .add(egui::Button::new("÷ 5").enabled(settings.width % 5 == 0))
-                    .clicked()
-                {
+                let r3 = ui.add(egui::Button::new("÷ 5").enabled(settings.width % 5 == 0));
+                if r3.clicked() {
                     settings.width /= 5;
                 }
-                if ui
-                    .add(egui::Button::new("÷ 7").enabled(settings.width % 7 == 0))
-                    .clicked()
-                {
+                let r4 = ui.add(egui::Button::new("÷ 7").enabled(settings.width % 7 == 0));
+                if r4.clicked() {
                     settings.width /= 7;
                 }
-                if ui.button("× 2").clicked() && 2 * settings.width <= max_width {
+                let r5 = ui.button("× 2");
+                if r5.clicked() && 2 * settings.width <= max_width {
                     settings.width *= 2;
                 }
+                response |= r1.union(r2).union(r3).union(r4).union(r5);
             });
-            ui.add(
+            response |= ui.add(
                 egui::Slider::new(&mut settings.stride, 1..=settings.max_stride)
                     .clamp_to_range(true)
                     .smart_aim(false)
                     .text("stride"),
             );
-            ui.separator();
+            response |= ui.separator();
 
-            ui.add(egui::Label::new("Offset").heading());
-            ui.add(
+            response |= ui.add(egui::Label::new("Offset").heading());
+            response |= ui.add(
                 egui::Slider::new(&mut settings.offset, 0..=settings.buffer_length)
                     .clamp_to_range(true)
                     .smart_aim(false)
                     .text("coarse"),
             );
-            ui.add(
+            response |= ui.add(
                 egui::Slider::new(&mut settings.offset_fine, 0..=max_offset_fine)
                     .clamp_to_range(true)
                     .smart_aim(false)
                     .text("fine"),
             );
-            ui.separator();
+            response |= ui.separator();
 
-            ui.add(egui::Label::new("Pixel style").heading());
-            ui.label("Single byte");
+            response |= ui.add(egui::Label::new("Pixel style").heading());
+            response |= ui.label("Single byte");
             ui.horizontal_wrapped(|ui| {
-                ui.selectable_value(&mut settings.pixel_style, PixelStyle::Colorful, "Default");
-                ui.selectable_value(&mut settings.pixel_style, PixelStyle::Category, "Category");
-                ui.selectable_value(
+                response |=
+                    ui.selectable_value(&mut settings.pixel_style, PixelStyle::Colorful, "Default");
+                response |= ui.selectable_value(
+                    &mut settings.pixel_style,
+                    PixelStyle::Category,
+                    "Category",
+                );
+                response |= ui.selectable_value(
                     &mut settings.pixel_style,
                     PixelStyle::Grayscale,
                     "Grayscale",
                 );
-                ui.selectable_value(
+                response |= ui.selectable_value(
                     &mut settings.pixel_style,
                     PixelStyle::GradientMagma,
                     "Magma",
                 );
-                ui.selectable_value(
+                response |= ui.selectable_value(
                     &mut settings.pixel_style,
                     PixelStyle::GradientPlasma,
                     "Plasma",
                 );
-                ui.selectable_value(
+                response |= ui.selectable_value(
                     &mut settings.pixel_style,
                     PixelStyle::GradientViridis,
                     "Viridis",
                 );
-                ui.selectable_value(
+                response |= ui.selectable_value(
                     &mut settings.pixel_style,
                     PixelStyle::GradientRainbow,
                     "Rainbow",
                 );
-                ui.selectable_value(
+                response |= ui.selectable_value(
                     &mut settings.pixel_style,
                     PixelStyle::GradientTurbo,
                     "Turbo",
                 );
-                ui.selectable_value(
+                response |= ui.selectable_value(
                     &mut settings.pixel_style,
                     PixelStyle::GradientCubehelix,
                     "Cubehelix",
                 );
-                ui.selectable_value(
+                response |= ui.selectable_value(
                     &mut settings.pixel_style,
                     PixelStyle::Entropy,
                     "Entropy (slow)",
                 );
             });
 
-            ui.label("Multi-byte");
+            response |= ui.label("Multi-byte");
             ui.horizontal(|ui| {
-                ui.selectable_value(&mut settings.pixel_style, PixelStyle::RGBA, "RGBA");
-                ui.selectable_value(&mut settings.pixel_style, PixelStyle::ABGR, "ABGR");
-                ui.selectable_value(&mut settings.pixel_style, PixelStyle::RGB, "RGB");
-                ui.selectable_value(&mut settings.pixel_style, PixelStyle::BGR, "BGR");
+                response |=
+                    ui.selectable_value(&mut settings.pixel_style, PixelStyle::RGBA, "RGBA");
+                response |=
+                    ui.selectable_value(&mut settings.pixel_style, PixelStyle::ABGR, "ABGR");
+                response |= ui.selectable_value(&mut settings.pixel_style, PixelStyle::RGB, "RGB");
+                response |= ui.selectable_value(&mut settings.pixel_style, PixelStyle::BGR, "BGR");
             });
-            ui.selectable_value(&mut settings.pixel_style, PixelStyle::Datatype, "Datatype");
-            ui.separator();
-            ui.label("Datatype");
+            response |=
+                ui.selectable_value(&mut settings.pixel_style, PixelStyle::Datatype, "Datatype");
+            response |= ui.separator();
+            response |= ui.label("Datatype");
+
             ui.vertical(|ui| {
                 ui.set_enabled(settings.pixel_style == PixelStyle::Datatype);
 
                 ui.horizontal_wrapped(|ui| {
-                    ui.selectable_value(
+                    response |= ui.selectable_value(
                         &mut settings.datatype_settings.datatype,
                         GuiDatatype::Integer8,
                         "Integer (8 bit)",
                     );
-                    ui.selectable_value(
+                    response |= ui.selectable_value(
                         &mut settings.datatype_settings.datatype,
                         GuiDatatype::Integer16,
                         "Integer (16 bit)",
                     );
-                    ui.selectable_value(
+                    response |= ui.selectable_value(
                         &mut settings.datatype_settings.datatype,
                         GuiDatatype::Integer32,
                         "Integer (32 bit)",
                     );
-                    ui.selectable_value(
+                    response |= ui.selectable_value(
                         &mut settings.datatype_settings.datatype,
                         GuiDatatype::Integer64,
                         "Integer (64 bit)",
                     );
-                    ui.selectable_value(
+                    response |= ui.selectable_value(
                         &mut settings.datatype_settings.datatype,
                         GuiDatatype::Float32,
                         "Float (32 bit)",
                     );
-                    ui.selectable_value(
+                    response |= ui.selectable_value(
                         &mut settings.datatype_settings.datatype,
                         GuiDatatype::Float64,
                         "Float (64 bit)",
@@ -251,18 +257,18 @@ impl Gui {
                         | GuiDatatype::Integer64 => true,
                         GuiDatatype::Float32 | GuiDatatype::Float64 => false,
                     });
-                    ui.selectable_value(
+                    response |= ui.selectable_value(
                         &mut settings.datatype_settings.signedness,
                         Signedness::Unsigned,
                         "Unsigned",
                     );
-                    ui.selectable_value(
+                    response |= ui.selectable_value(
                         &mut settings.datatype_settings.signedness,
                         Signedness::Signed,
                         "Signed",
                     );
                 });
-                ui.label("Endianness");
+                response |= ui.label("Endianness");
                 ui.horizontal(|ui| {
                     // Only enable for datatypes that are multi-byte
                     ui.set_enabled(match settings.datatype_settings.datatype {
@@ -273,42 +279,45 @@ impl Gui {
                         | GuiDatatype::Float32
                         | GuiDatatype::Float64 => true,
                     });
-                    ui.selectable_value(
+                    response |= ui.selectable_value(
                         &mut settings.datatype_settings.endianness,
                         Endianness::Little,
                         "Little Endian",
                     );
-                    ui.selectable_value(
+                    response |= ui.selectable_value(
                         &mut settings.datatype_settings.endianness,
                         Endianness::Big,
                         "Big Endian",
                     );
                 });
-                ui.label("");
+                response |= ui.label("");
                 ui.horizontal(|ui| {
                     ui.label("min:");
-                    ui.add(egui::DragValue::new(&mut settings.value_range.0).speed(10.0));
+                    response |=
+                        ui.add(egui::DragValue::new(&mut settings.value_range.0).speed(10.0));
                     ui.label("max:");
-                    ui.add(egui::DragValue::new(&mut settings.value_range.1).speed(10.0));
+                    response |=
+                        ui.add(egui::DragValue::new(&mut settings.value_range.1).speed(10.0));
                 });
             });
 
-            ui.separator();
+            response |= ui.separator();
 
-            ui.checkbox(&mut settings.hex_view_visible, "hex view");
-            ui.separator();
+            response |= ui.checkbox(&mut settings.hex_view_visible, "hex view");
+            response |= ui.separator();
 
-            ui.add(egui::Label::new("Information").heading());
+            response |= ui.add(egui::Label::new("Information").heading());
             let file_size = settings
                 .buffer_length
                 .file_size(file_size_opts::BINARY)
                 .unwrap();
-            ui.label(format!("file size: {}", file_size));
+            response |= ui.label(format!("file size: {}", file_size));
             let zoom_factor = settings.zoom_factor();
             let grid_size = (settings.width * (HEIGHT as isize) * settings.stride / zoom_factor)
                 .file_size(file_size_opts::BINARY)
                 .unwrap();
-            ui.label(format!("grid size: {}", grid_size));
+            response |= ui.label(format!("grid size: {}", grid_size));
+            response
         });
 
         if settings.hex_view_visible {
@@ -330,6 +339,7 @@ impl Gui {
 
         settings.gui_wants_keyboard = ctx.wants_keyboard_input();
         settings.gui_wants_mouse = ctx.wants_pointer_input();
+        settings_response.inner
     }
 
     /// Render egui.
