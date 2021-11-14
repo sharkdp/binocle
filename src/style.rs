@@ -147,9 +147,9 @@ impl Style for DatatypeStyle {
     }
 }
 
-pub struct RGBA;
+pub struct Rgba;
 
-impl Style for RGBA {
+impl Style for Rgba {
     fn color_at_index(&mut self, view: &View, view_index: isize) -> Color {
         if let Some(int) = view.be_u32_at(view_index) {
             int.to_be_bytes()
@@ -159,9 +159,9 @@ impl Style for RGBA {
     }
 }
 
-pub struct ABGR;
+pub struct Abgr;
 
-impl Style for ABGR {
+impl Style for Abgr {
     fn color_at_index(&mut self, view: &View, view_index: isize) -> Color {
         if let Some(int) = view.be_u32_at(view_index) {
             int.to_le_bytes()
@@ -171,9 +171,9 @@ impl Style for ABGR {
     }
 }
 
-pub struct RGB;
+pub struct Rgb;
 
-impl Style for RGB {
+impl Style for Rgb {
     fn color_at_index(&mut self, view: &View, view_index: isize) -> Color {
         if let Some([r, g, b]) = view.rgb_at(view_index) {
             [r, g, b, 255]
@@ -183,9 +183,9 @@ impl Style for RGB {
     }
 }
 
-pub struct BGR;
+pub struct Bgr;
 
-impl Style for BGR {
+impl Style for Bgr {
     fn color_at_index(&mut self, view: &View, view_index: isize) -> Color {
         if let Some([b, g, r]) = view.rgb_at(view_index) {
             [r, g, b, 255]

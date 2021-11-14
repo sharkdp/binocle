@@ -198,10 +198,10 @@ impl Gui {
 
             ui.label("Multi-byte");
             ui.horizontal(|ui| {
-                ui.selectable_value(&mut settings.pixel_style, PixelStyle::RGBA, "RGBA");
-                ui.selectable_value(&mut settings.pixel_style, PixelStyle::ABGR, "ABGR");
-                ui.selectable_value(&mut settings.pixel_style, PixelStyle::RGB, "RGB");
-                ui.selectable_value(&mut settings.pixel_style, PixelStyle::BGR, "BGR");
+                ui.selectable_value(&mut settings.pixel_style, PixelStyle::Rgba, "RGBA");
+                ui.selectable_value(&mut settings.pixel_style, PixelStyle::Abgr, "ABGR");
+                ui.selectable_value(&mut settings.pixel_style, PixelStyle::Rgb, "RGB");
+                ui.selectable_value(&mut settings.pixel_style, PixelStyle::Bgr, "BGR");
             });
             ui.selectable_value(&mut settings.pixel_style, PixelStyle::Datatype, "Datatype");
             ui.separator();

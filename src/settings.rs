@@ -15,10 +15,10 @@ pub enum PixelStyle {
     GradientRainbow,
     GradientTurbo,
     GradientCubehelix,
-    RGBA,
-    ABGR,
-    RGB,
-    BGR,
+    Rgba,
+    Abgr,
+    Rgb,
+    Bgr,
     Datatype,
 }
 

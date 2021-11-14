@@ -5,8 +5,8 @@ use crate::datatype::Datatype;
 use crate::options::{BackingOption, CliOptions};
 use crate::settings::{GuiDatatype, PixelStyle, Settings, WIDTH};
 use crate::style::{
-    Category, ColorGradient, Colorful, DatatypeStyle, Entropy, Grayscale, Style, ABGR, BGR, RGB,
-    RGBA,
+    Abgr, Bgr, Category, ColorGradient, Colorful, DatatypeStyle, Entropy, Grayscale, Rgb, Rgba,
+    Style,
 };
 use crate::view::View;
 
@@ -94,10 +94,10 @@ impl Binocle {
             PixelStyle::GradientCubehelix => {
                 Box::new(ColorGradient::new(colorgrad::cubehelix_default()))
             }
-            PixelStyle::RGBA => Box::new(RGBA {}),
-            PixelStyle::ABGR => Box::new(ABGR {}),
-            PixelStyle::RGB => Box::new(RGB {}),
-            PixelStyle::BGR => Box::new(BGR {}),
+            PixelStyle::Rgba => Box::new(Rgba {}),
+            PixelStyle::Abgr => Box::new(Abgr {}),
+            PixelStyle::Rgb => Box::new(Rgb {}),
+            PixelStyle::Bgr => Box::new(Bgr {}),
             PixelStyle::Entropy => Box::new(Entropy::with_window_size(32)),
             PixelStyle::Datatype => Box::new(DatatypeStyle::new(
                 match (
