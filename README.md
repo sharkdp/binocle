@@ -41,6 +41,14 @@ wget https://github.com/sharkdp/binocle/releases/download/v0.2.0/binocle_0.2.0_a
 sudo dpkg -i binocle_0.2.0_amd64.deb
 ```
 
+### On Arch Linux
+
+binocle can be installed from the [community repository](https://archlinux.org/packages/community/x86_64/binocle/) using [pacman](https://wiki.archlinux.org/title/Pacman):
+
+```
+pacman -S binocle
+```
+
 ### From binaries (Linux, macOS, Windows)
 
 Download the corresponding archive from the [Release page](https://github.com/sharkdp/binocle/releases).
