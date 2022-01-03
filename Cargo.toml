@@ -15,7 +15,7 @@ optimize = ["log/release_max_level_warn"]
 default = ["optimize"]
 
 [dependencies]
-clap = "3.0.0-beta.5"
+clap = { version = "3.0", features = ["derive"] }
 colorgrad = "0.5"
 egui = "0.14"
 egui_wgpu_backend = "0.13"
@@ -28,4 +28,3 @@ winit_input_helper = "0.10"
 anyhow = "1.0"
 humansize = "1.1"
 memmap2 = "0.5.0"
-

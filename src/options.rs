@@ -1,33 +1,17 @@
-use clap::{crate_description, crate_version, Parser};
-use std::str::FromStr;
+use clap::{ArgEnum, Parser};
 
 #[derive(Parser)]
-#[clap(version = crate_version!(), about = crate_description!())]
+#[clap(version, about)]
 pub struct CliOptions {
     pub filename: String,
-    #[clap(
-        name = "backing",
-        long,
-        possible_values = ["mmap", "file"],
-        default_value = "mmap",
-        about = "Whether to use memory mapping to read the file contents or not"
-    )]
+
+    /// Whether to use memory mapping to read the file contents or not
+    #[clap(long, arg_enum, default_value = "mmap")]
     pub backing: BackingOption,
 }
 
+#[derive(ArgEnum, Copy, Clone)]
 pub enum BackingOption {
     File,
     Mmap,
-}
-
-impl FromStr for BackingOption {
-    type Err = anyhow::Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s.to_lowercase().as_str() {
-            "file" => Ok(BackingOption::File),
-            "mmap" => Ok(BackingOption::Mmap),
-            _ => unreachable!("clap ensures that this is not reachable"),
-        }
-    }
 }
