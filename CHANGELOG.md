@@ -11,6 +11,10 @@
 
 ## Packaging
 
+# v0.3.0
+
+- Improved performance for the entropy computation, see #32 (@siedentop)
+
 # v0.2.0
 
 - Support for using `mmap`, allowing to view huge files while decreasing memory consumption to a minimum, see #21 and #24 (@toolCHAINZ)

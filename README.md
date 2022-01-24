@@ -37,8 +37,8 @@ the *width* of the rectangular grid as well as the way in which (groups of) byte
 Download the appropriate `.deb` package from the [Release page](https://github.com/sharkdp/binocle/releases)
 and install it via `dpkg`:
 ```
-wget https://github.com/sharkdp/binocle/releases/download/v0.2.0/binocle_0.2.0_amd64.deb
-sudo dpkg -i binocle_0.2.0_amd64.deb
+wget https://github.com/sharkdp/binocle/releases/download/v0.3.0/binocle_0.3.0_amd64.deb
+sudo dpkg -i binocle_0.3.0_amd64.deb
 ```
 
 ### On Arch Linux
