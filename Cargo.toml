@@ -17,14 +17,14 @@ default = ["optimize"]
 [dependencies]
 clap = { version = "3.0", features = ["derive"] }
 colorgrad = "0.5"
-egui = "0.14"
-egui_wgpu_backend = "0.13"
-egui_winit_platform = { version = "0.10" }
+egui = "0.15"
+egui_wgpu_backend = "0.14"
+egui_winit_platform = { version = "0.12" }
 env_logger = "0.9"
 log = "0.4"
 pixels = "0.7"
-winit = "0.25"
-winit_input_helper = "0.10"
+winit = "0.26"
+winit_input_helper = "0.11"
 anyhow = "1.0"
 humansize = "1.1"
 memmap2 = "0.5.0"

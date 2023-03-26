@@ -99,25 +99,25 @@ impl Gui {
             );
             ui.horizontal(|ui| {
                 if ui
-                    .add(egui::Button::new("÷ 2").enabled(settings.width % 2 == 0))
+                    .add_enabled(settings.width % 2 == 0, egui::Button::new("÷ 2"))
                     .clicked()
                 {
                     settings.width /= 2;
                 }
                 if ui
-                    .add(egui::Button::new("÷ 3").enabled(settings.width % 3 == 0))
+                    .add_enabled(settings.width % 3 == 0, egui::Button::new("÷ 3"))
                     .clicked()
                 {
                     settings.width /= 3;
                 }
                 if ui
-                    .add(egui::Button::new("÷ 5").enabled(settings.width % 5 == 0))
+                    .add_enabled(settings.width % 5 == 0, egui::Button::new("÷ 5"))
                     .clicked()
                 {
                     settings.width /= 5;
                 }
                 if ui
-                    .add(egui::Button::new("÷ 7").enabled(settings.width % 7 == 0))
+                    .add_enabled(settings.width % 7 == 0, egui::Button::new("÷ 7"))
                     .clicked()
                 {
                     settings.width /= 7;
