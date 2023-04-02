@@ -37,7 +37,7 @@ pub fn run(options: CliOptions) -> Result<()> {
     let window = {
         let size = LogicalSize::new(WIDTH as f64, HEIGHT as f64);
         WindowBuilder::new()
-            .with_title(&format!(
+            .with_title(format!(
                 "binocle - {}",
                 Path::new(&options.filename)
                     .file_name()

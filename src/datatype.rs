@@ -97,14 +97,10 @@ impl Datatype {
                 .ok()
                 .map(|bytes| i64::from_be_bytes(bytes) as f32),
 
-            (Datatype::Float32, Endianness::Little) => slice
-                .try_into()
-                .ok()
-                .map(|bytes| f32::from_le_bytes(bytes) as f32),
-            (Datatype::Float32, Endianness::Big) => slice
-                .try_into()
-                .ok()
-                .map(|bytes| f32::from_be_bytes(bytes) as f32),
+            (Datatype::Float32, Endianness::Little) => {
+                slice.try_into().ok().map(f32::from_le_bytes)
+            }
+            (Datatype::Float32, Endianness::Big) => slice.try_into().ok().map(f32::from_be_bytes),
 
             (Datatype::Float64, Endianness::Little) => slice
                 .try_into()
