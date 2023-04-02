@@ -11,6 +11,10 @@
 
 ## Packaging
 
+# v0.3.1
+
+- Update dependencies to fix crash on Wayland, see #47 and #48 (@cyrozap)
+
 # v0.3.0
 
 - Improved performance for the entropy computation, see #32 (@siedentop)
