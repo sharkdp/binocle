@@ -56,8 +56,13 @@ pub fn run(options: CliOptions) -> Result<()> {
         let scale_factor = window.scale_factor();
         let surface_texture = SurfaceTexture::new(window_size.width, window_size.height, &window);
         let pixels = Pixels::new(WIDTH, HEIGHT, surface_texture)?;
-        let gui = Gui::new(window_size.width, window_size.height, scale_factor, &pixels);
-
+        let gui = Gui::new(
+            &event_loop,
+            window_size.width,
+            window_size.height,
+            scale_factor as f32,
+            &pixels,
+        );
         (pixels, gui)
     };
 
@@ -67,12 +72,14 @@ pub fn run(options: CliOptions) -> Result<()> {
 
     event_loop.run(move |event, _, control_flow| {
         // Update egui inputs
-        gui.handle_event(&event);
+        if let Event::WindowEvent { event, .. } = &event {
+            gui.handle_event(event);
+        }
 
         // Draw the current frame
         if let Event::RedrawRequested(_) = event {
             // Draw the binocle
-            binocle.draw(pixels.get_frame());
+            binocle.draw(pixels.frame_mut());
 
             // Prepare egui
             gui.prepare(&window, &mut binocle.settings);
@@ -83,7 +90,7 @@ pub fn run(options: CliOptions) -> Result<()> {
                 context.scaling_renderer.render(encoder, render_target);
 
                 // Render egui
-                gui.render(encoder, render_target, context)?;
+                gui.render(encoder, render_target, context);
 
                 Ok(())
             });
@@ -101,7 +108,7 @@ pub fn run(options: CliOptions) -> Result<()> {
         // Handle input events
         if input.update(&event) {
             {
-                let mut settings = &mut binocle.settings;
+                let settings = &mut binocle.settings;
 
                 let offset_factor = if input.held_shift() { 1 } else { 160 };
 

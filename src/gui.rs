@@ -1,8 +1,10 @@
+use egui::{ClippedPrimitive, TexturesDelta, WidgetText};
 use std::time::Instant;
 
-use egui::{ClippedMesh, FontDefinitions};
-use egui_wgpu_backend::{BackendError, RenderPass, ScreenDescriptor};
-use egui_winit_platform::{Platform, PlatformDescriptor};
+use egui_wgpu::renderer::ScreenDescriptor;
+use egui_wgpu::Renderer;
+use egui_winit::winit::event_loop::EventLoopWindowTarget;
+
 use humansize::{file_size_opts, FileSize};
 use pixels::{wgpu, PixelsContext};
 use winit::window::Window;
@@ -15,73 +17,79 @@ use crate::{
 pub struct Gui {
     // State for egui.
     start_time: Instant,
-    platform: Platform,
+    egui_ctx: egui::Context,
+    egui_state: egui_winit::State,
     screen_descriptor: ScreenDescriptor,
-    rpass: RenderPass,
-    paint_jobs: Vec<ClippedMesh>,
+    paint_jobs: Vec<ClippedPrimitive>,
+    renderer: Renderer,
+    textures: TexturesDelta,
 }
 
 impl Gui {
-    pub fn new(width: u32, height: u32, scale_factor: f64, pixels: &pixels::Pixels) -> Self {
-        let platform = Platform::new(PlatformDescriptor {
-            physical_width: width,
-            physical_height: height,
-            scale_factor,
-            font_definitions: FontDefinitions::default(),
-            style: Default::default(),
-        });
+    pub fn new<T>(
+        event_loop: &EventLoopWindowTarget<T>,
+        width: u32,
+        height: u32,
+        scale_factor: f32,
+        pixels: &pixels::Pixels,
+    ) -> Self {
+        let max_texture_size = pixels.device().limits().max_texture_dimension_2d as usize;
+
+        let egui_ctx = egui::Context::default();
+        let mut egui_state = egui_winit::State::new(event_loop);
+        egui_state.set_max_texture_side(max_texture_size);
+        egui_state.set_pixels_per_point(scale_factor);
         let screen_descriptor = ScreenDescriptor {
-            physical_width: width,
-            physical_height: height,
-            scale_factor: scale_factor as f32,
+            size_in_pixels: [width, height],
+            pixels_per_point: scale_factor,
         };
-        let rpass = RenderPass::new(pixels.device(), pixels.render_texture_format(), 1);
+        let renderer = Renderer::new(pixels.device(), pixels.render_texture_format(), None, 1);
+        let textures = TexturesDelta::default();
 
         Self {
             start_time: Instant::now(),
-            platform,
+            egui_ctx,
+            egui_state,
             screen_descriptor,
-            rpass,
+            renderer,
             paint_jobs: Vec::new(),
+            textures,
         }
     }
 
-    pub fn handle_event(&mut self, event: &winit::event::Event<'_, ()>) {
-        self.platform.handle_event(event);
+    pub fn handle_event(&mut self, event: &winit::event::WindowEvent) {
+        let _ = self.egui_state.on_event(&self.egui_ctx, event);
     }
 
     pub fn resize(&mut self, width: u32, height: u32) {
         if width > 0 && height > 0 {
-            self.screen_descriptor.physical_width = width;
-            self.screen_descriptor.physical_height = height;
+            self.screen_descriptor.size_in_pixels = [width, height];
         }
     }
 
     pub fn scale_factor(&mut self, scale_factor: f64) {
-        self.screen_descriptor.scale_factor = scale_factor as f32;
+        self.screen_descriptor.pixels_per_point = scale_factor as f32;
     }
 
     pub fn prepare(&mut self, window: &Window, settings: &mut Settings) {
-        self.platform
-            .update_time(self.start_time.elapsed().as_secs_f64());
+        // Run the egui frame and create all paint jobs to prepare for rendering.
+        let raw_input = self.egui_state.take_egui_input(window);
+        let output = self.egui_ctx.run(raw_input, |egui_ctx| {
+            // Draw the demo application.
+            Self::ui(egui_ctx, settings);
+        });
 
-        // Begin the egui frame.
-        self.platform.begin_frame();
-
-        // Draw the application.
-        self.ui(&self.platform.context(), settings);
-
-        // End the egui frame and create all paint jobs to prepare for rendering.
-        let (_output, paint_commands) = self.platform.end_frame(Some(window));
-        self.paint_jobs = self.platform.context().tessellate(paint_commands);
+        self.textures.append(output.textures_delta);
+        self.egui_state
+            .handle_platform_output(window, &self.egui_ctx, output.platform_output);
+        self.paint_jobs = self.egui_ctx.tessellate(output.shapes);
     }
 
-    /// Create the UI using egui.
-    fn ui(&mut self, ctx: &egui::CtxRef, settings: &mut Settings) {
+    fn ui(ctx: &egui::Context, settings: &mut Settings) {
         let max_offset_fine = settings.max_offset_fine();
         let max_width = settings.max_width();
         egui::SidePanel::right("Settings").show(ctx, |ui| {
-            ui.add(egui::Label::new("Layout").heading());
+            ui.heading("Layout");
             ui.add(
                 egui::Slider::new(
                     &mut settings.zoom,
@@ -134,7 +142,7 @@ impl Gui {
             );
             ui.separator();
 
-            ui.add(egui::Label::new("Offset").heading());
+            ui.heading("Offset");
             ui.add(
                 egui::Slider::new(&mut settings.offset, 0..=settings.buffer_length)
                     .clamp_to_range(true)
@@ -149,7 +157,7 @@ impl Gui {
             );
             ui.separator();
 
-            ui.add(egui::Label::new("Pixel style").heading());
+            ui.heading("Pixel style");
             ui.label("Single byte");
             ui.horizontal_wrapped(|ui| {
                 ui.selectable_value(&mut settings.pixel_style, PixelStyle::Colorful, "Default");
@@ -298,7 +306,7 @@ impl Gui {
             ui.checkbox(&mut settings.hex_view_visible, "hex view");
             ui.separator();
 
-            ui.add(egui::Label::new("Information").heading());
+            ui.heading("Information");
             let file_size = settings
                 .buffer_length
                 .file_size(file_size_opts::BINARY)
@@ -315,13 +323,11 @@ impl Gui {
             egui::TopBottomPanel::bottom("hex view").show(ctx, |ui| {
                 ui.horizontal(|ui| {
                     ui.add(
-                        egui::Label::new(&mut settings.hex_view)
-                            .monospace()
+                        egui::Label::new(WidgetText::from(&settings.hex_view).monospace())
                             .wrap(false),
                     );
                     ui.add(
-                        egui::Label::new(&mut settings.hex_ascii)
-                            .monospace()
+                        egui::Label::new(WidgetText::from(&settings.hex_ascii).monospace())
                             .wrap(false),
                     );
                 });
@@ -332,35 +338,48 @@ impl Gui {
         settings.gui_wants_mouse = ctx.wants_pointer_input();
     }
 
-    /// Render egui.
     pub fn render(
         &mut self,
         encoder: &mut wgpu::CommandEncoder,
         render_target: &wgpu::TextureView,
         context: &PixelsContext,
-    ) -> Result<(), BackendError> {
+    ) {
         // Upload all resources to the GPU.
-        self.rpass.update_texture(
+        for (id, image_delta) in &self.textures.set {
+            self.renderer
+                .update_texture(&context.device, &context.queue, *id, image_delta);
+        }
+        self.renderer.update_buffers(
             &context.device,
             &context.queue,
-            &self.platform.context().texture(),
-        );
-        self.rpass
-            .update_user_textures(&context.device, &context.queue);
-        self.rpass.update_buffers(
-            &context.device,
-            &context.queue,
+            encoder,
             &self.paint_jobs,
             &self.screen_descriptor,
         );
 
-        // Record all render passes.
-        self.rpass.execute(
-            encoder,
-            render_target,
-            &self.paint_jobs,
-            &self.screen_descriptor,
-            None,
-        )
+        // Render egui with WGPU
+        {
+            let mut rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label: Some("egui"),
+                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                    view: render_target,
+                    resolve_target: None,
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Load,
+                        store: true,
+                    },
+                })],
+                depth_stencil_attachment: None,
+            });
+
+            self.renderer
+                .render(&mut rpass, &self.paint_jobs, &self.screen_descriptor);
+        }
+
+        // Cleanup
+        let textures = std::mem::take(&mut self.textures);
+        for id in &textures.free {
+            self.renderer.free_texture(id);
+        }
     }
 }
