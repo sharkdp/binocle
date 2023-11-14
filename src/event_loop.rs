@@ -231,6 +231,30 @@ pub fn run(options: CliOptions) -> Result<()> {
                     }
 
                     if let Some((x, y)) = input.mouse() {
+                        if let Ok((x, y)) = pixels.window_pos_to_pixel((x, y)) {
+                            let px_size = 2usize.pow((settings.zoom - 1) as u32);
+                            let x_px = x / px_size;
+                            let y_px = y / px_size;
+                            let px_window_selected = x_px + (y_px * settings.width as usize);
+                            let offset = settings.offset + settings.offset_fine;
+                            let byte_data_selected = px_window_selected + offset as usize;
+                            let data = binocle.buffer.data();
+                            let start = data.get(byte_data_selected..);
+                            let end = start.map(|start| start.get(..16)).flatten();
+                            let bytes = match (start, end) {
+                                (None, _) => None,
+                                (Some(partial_data), None) => {
+                                    let mut data = 0u128.to_ne_bytes();
+                                    data[..partial_data.len()].copy_from_slice(partial_data);
+                                    Some(data)
+                                }
+                                (_, Some(data)) => Some(data.try_into().unwrap()),
+                            };
+                            if let Some(bytes) = bytes {
+                                settings.selected_byte = byte_data_selected;
+                                settings.selected_data = bytes;
+                            }
+                        }
                         if input.mouse_pressed(0) {
                             if input.held_shift() {
                                 mouse_drag_action = MouseDragAction::ControlOffsetFine {

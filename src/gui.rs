@@ -298,6 +298,36 @@ impl Gui {
             ui.checkbox(&mut settings.hex_view_visible, "hex view");
             ui.separator();
 
+            ui.add(egui::Label::new("Data information").heading());
+            let data_u128 = u128::from_le_bytes(settings.selected_data);
+            let data_u8 = data_u128 as u8;
+            let data_u16 = data_u128 as u16;
+            let data_u32 = data_u128 as u32;
+            let data_u64 = data_u128 as u64;
+            let mut to_label = |x: String| {
+                ui.add(egui::Label::new(x).monospace().wrap(false));
+            };
+            to_label(format!("byte: {}", settings.selected_byte));
+            to_label(format!("u8: {data_u8}"));
+            to_label(format!("i8: {}", data_u8 as i8));
+            to_label(format!("u16le: {data_u16}"));
+            to_label(format!("u16be: {}", data_u16.to_be()));
+            to_label(format!("i16le: {}", data_u16 as i16));
+            to_label(format!("i16be: {}", data_u16.to_be() as i16));
+            to_label(format!("u32le: {data_u32}"));
+            to_label(format!("u32be: {}", data_u32.to_be()));
+            to_label(format!("i32le: {}", data_u32 as i32));
+            to_label(format!("i32be: {}", data_u32.to_be() as i32));
+            to_label(format!("u64le: {data_u64}"));
+            to_label(format!("u64be: {}", data_u64.to_be()));
+            to_label(format!("i64le: {}", data_u64 as i64));
+            to_label(format!("i64be: {}", data_u64.to_be() as i64));
+            to_label(format!("f32le: {:e}", f32::from_bits(data_u32)));
+            to_label(format!("f32be: {:e}", f32::from_bits(data_u32.to_be())));
+            to_label(format!("f64le: {:e}", f64::from_bits(data_u64)));
+            to_label(format!("f64be: {:e}", f64::from_bits(data_u64.to_be())));
+
+            ui.separator();
             ui.add(egui::Label::new("Information").heading());
             let file_size = settings
                 .buffer_length

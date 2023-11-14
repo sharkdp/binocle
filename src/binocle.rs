@@ -12,7 +12,7 @@ use crate::view::View;
 
 pub struct Binocle {
     pub settings: Settings,
-    buffer: Buffer,
+    pub buffer: Buffer,
 }
 
 impl Binocle {
