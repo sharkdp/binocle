@@ -43,7 +43,7 @@ sudo dpkg -i binocle_0.3.1_amd64.deb
 
 ### On Arch Linux
 
-binocle can be installed from the [community repository](https://archlinux.org/packages/community/x86_64/binocle/) using [pacman](https://wiki.archlinux.org/title/Pacman):
+binocle can be installed from the [extra repository](https://archlinux.org/packages/extra/x86_64/binocle/) using [pacman](https://wiki.archlinux.org/title/Pacman):
 
 ```
 pacman -S binocle
