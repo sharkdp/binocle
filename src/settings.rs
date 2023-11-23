@@ -63,6 +63,9 @@ pub struct Settings {
 
     pub gui_wants_keyboard: bool,
     pub gui_wants_mouse: bool,
+
+    pub selected_byte: usize,
+    pub selected_data: [u8; 16],
 }
 
 impl Settings {
@@ -103,6 +106,8 @@ impl Default for Settings {
             hex_ascii: "".into(),
             gui_wants_keyboard: false,
             gui_wants_mouse: false,
+            selected_byte: 0,
+            selected_data: [0; 16],
         }
     }
 }
