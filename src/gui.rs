@@ -1,5 +1,4 @@
 use egui::{ClippedPrimitive, TexturesDelta, WidgetText};
-use std::time::Instant;
 
 use egui_wgpu::renderer::ScreenDescriptor;
 use egui_wgpu::Renderer;
@@ -16,7 +15,6 @@ use crate::{
 
 pub struct Gui {
     // State for egui.
-    start_time: Instant,
     egui_ctx: egui::Context,
     egui_state: egui_winit::State,
     screen_descriptor: ScreenDescriptor,
@@ -47,7 +45,6 @@ impl Gui {
         let textures = TexturesDelta::default();
 
         Self {
-            start_time: Instant::now(),
             egui_ctx,
             egui_state,
             screen_descriptor,

@@ -116,7 +116,7 @@ pub fn run(options: CliOptions) -> Result<()> {
                     // Close events
                     if input.key_pressed(VirtualKeyCode::Escape)
                         || input.key_pressed(VirtualKeyCode::Q)
-                        || input.quit()
+                        || (input.close_requested() || input.destroyed())
                     {
                         *control_flow = ControlFlow::Exit;
                         return;
@@ -321,7 +321,7 @@ pub fn run(options: CliOptions) -> Result<()> {
 
                 // Resize the window
                 if let Some(size) = input.window_resized() {
-                    pixels.resize_surface(size.width, size.height);
+                    let _ = pixels.resize_surface(size.width, size.height);
                     gui.resize(size.width, size.height);
                 }
             }
