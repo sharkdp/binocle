@@ -1,7 +1,7 @@
 use crate::datatype::{Endianness, Signedness};
 
 pub const WIDTH: u32 = 1366;
-pub const HEIGHT: u32 = 1024;
+pub const HEIGHT: u32 = 800;
 
 #[derive(PartialEq)]
 pub enum PixelStyle {
