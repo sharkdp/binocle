@@ -36,7 +36,7 @@ the *width* of the rectangular grid as well as the way in which (groups of) byte
 
 Download the appropriate `.deb` package from the [Release page](https://github.com/sharkdp/binocle/releases)
 and install it via `dpkg`:
-```
+```bash
 wget https://github.com/sharkdp/binocle/releases/download/v0.3.1/binocle_0.3.1_amd64.deb
 sudo dpkg -i binocle_0.3.1_amd64.deb
 ```
@@ -45,7 +45,7 @@ sudo dpkg -i binocle_0.3.1_amd64.deb
 
 binocle can be installed from the [extra repository](https://archlinux.org/packages/extra/x86_64/binocle/) using [pacman](https://wiki.archlinux.org/title/Pacman):
 
-```
+```bash
 pacman -S binocle
 ```
 
@@ -56,7 +56,7 @@ Download the corresponding archive from the [Release page](https://github.com/sh
 ### With cargo (Linux, macOS, Windows)
 
 binocle can be installed via [cargo](https://doc.rust-lang.org/cargo/):
-```
+```bash
 cargo install binocle
 ```
 
@@ -72,3 +72,5 @@ See the [LICENSE-APACHE](LICENSE-APACHE) and [LICENSE-MIT](LICENSE-MIT) files fo
   - [binvis.io](http://binvis.io/)
   - [cantor.dust](https://sites.google.com/site/xxcantorxdustxx/) ([talk](https://www.youtube.com/watch?v=4bM3Gut1hIk))
   - [veles.io](https://veles.io) ([GitHub [archived]](https://github.com/codilime/veles))
+  - [hobbits](https://github.com/Mahlet-Inc/hobbits)
+  
