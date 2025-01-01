@@ -45,7 +45,7 @@ impl Binocle {
             1,
         );
 
-        let max_size = 4*8;
+        let max_size = 4 * 8;
         let width = (self.settings.width * self.settings.stride).min(max_size);
         let height = 24;
 
