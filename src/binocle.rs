@@ -45,13 +45,17 @@ impl Binocle {
             1,
         );
 
-        let width = (self.settings.width * self.settings.stride).min(36);
+        let max_size = 4*8;
+        let width = (self.settings.width * self.settings.stride).min(max_size);
         let height = 24;
 
         for i in 0..(width * height) {
-            if i > 0 && i % width == 0 {
-                hex_view.push('\n');
-                hex_ascii.push('\n');
+            if i % width == 0 {
+                if i > 0 {
+                    hex_view.push('\n');
+                    hex_ascii.push('\n');
+                }
+                hex_view.push_str(&format!("{:08x}: ", view.data_index(i)));
             } else if i > 0 && (i % width) % 8 == 0 {
                 hex_view.push(' ');
             }

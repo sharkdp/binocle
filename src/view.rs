@@ -24,7 +24,7 @@ impl<'a> View<'a> {
     //     (self.data.len() as isize - self.start + self.stride - 1) / self.stride
     // }
 
-    fn data_index(&self, view_index: isize) -> usize {
+    pub fn data_index(&self, view_index: isize) -> usize {
         (self.start + view_index * self.stride)
             .try_into()
             .expect("positive index")
