@@ -231,7 +231,7 @@ jobs:
         Files: *
         Copyright: ${{ needs.crate_metadata.outputs.maintainer }}
         Copyright: $COPYRIGHT_YEARS ${{ needs.crate_metadata.outputs.maintainer }}
-        License: Apache-2.0 or MIT
+        License: Apache-2.0 OR MIT
 
         License: Apache-2.0
           On Debian systems, the complete text of the Apache-2.0 can be found in the

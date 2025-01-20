@@ -2,7 +2,7 @@
 authors = ["David Peter <mail@david-peter.de>"]
 description = "A graphical tool to visualize binary data"
 homepage = "https://github.com/sharkdp/binocle"
-license = "MIT/Apache-2.0"
+license = "Apache-2.0 OR MIT"
 name = "binocle"
 readme = "README.md"
 repository = "https://github.com/sharkdp/binocle"
